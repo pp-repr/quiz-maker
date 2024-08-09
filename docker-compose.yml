@@ -1,0 +1,52 @@
+services:
+  fastapi:
+    build: .
+    container_name: fastapi
+    ports:
+      - "8000:8000"
+    environment:
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_PORT=${MYSQL_PORT}
+    depends_on:
+      - mysql-service
+    networks:
+      - app-network
+    volumes:
+      - ./app:/fastapi-app/app
+      - ./alembic:/fastapi-app/alembic
+      - ./tests:/fastapi-app/tests
+    env_file:
+      - .env
+
+  mysql-service:
+    image: mysql:latest
+    container_name: mysql-service
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+    env_file:
+      - .env
+    
+  smtp-service:
+    image: axllent/mailpit
+    restart: unless-stopped
+    container_name: smtp
+    networks:
+      - app-network
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
+
+networks:
+  app-network:
+    driver: bridge
