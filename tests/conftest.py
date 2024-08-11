@@ -12,10 +12,11 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.main import app
 from app.config.database import Base, get_session
 from app.models.user import User
+from app.config.security import get_hash_password
 
 USER_NAME = "Jan Kowalski"
 USER_EMAIL = "kowalski@gmail.com"
-USER_PASSWORD = "haslo123"
+USER_PASSWORD = "Haslo123@"
 
 engine = create_engine("sqlite:///./fastapi.db")
 SessionTesting = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -39,11 +40,24 @@ def app_test():
 
 @pytest.fixture(scope="function")
 def client(app_test, test_session):
-    def _test_db():
+    def test_db():
         try:
             yield test_session
         finally:
             pass
     
-    app_test.dependency_overrides[get_session] = _test_db
+    app_test.dependency_overrides[get_session] = test_db
     return TestClient(app_test)
+
+
+@pytest.fixture(scope="function")
+def user(test_session):
+    model = User()
+    model.name = USER_NAME
+    model.email = USER_EMAIL
+    model.password = get_hash_password(USER_PASSWORD)
+    model.is_active = False
+    test_session.add(model)
+    test_session.commit()
+    test_session.refresh(model)
+    return model

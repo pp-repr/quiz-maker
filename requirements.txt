@@ -13,3 +13,5 @@ pytest
 httpx
 pydantic[email]
 requests
+fastapi-mail
+Jinja2
