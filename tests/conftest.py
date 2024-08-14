@@ -1,6 +1,7 @@
 import sys
 import os
 from typing import Generator
+import datetime
 
 import pytest
 from sqlalchemy import create_engine
@@ -11,12 +12,22 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.main import app
 from app.config.database import Base, get_session
+from app.config.email import fm
 from app.models.user import User
 from app.config.security import get_hash_password
 
 USER_NAME = "Jan Kowalski"
 USER_EMAIL = "kowalski@gmail.com"
 USER_PASSWORD = "Haslo123@"
+INCORRECT_PASSWORD = "Incorrectpassword0!"
+UNREGISTERED_EMAIL = 'Unregistered@email.com'
+INCORRECT_TOKEN = "$2b$12$E0Bt0yZ1rbdVnL4DHJ8HOuulMNe50Vaz/nVMPEhBbEAfAhRDZ/bRS"
+INVALID_EMAIL = "google.com"
+EMPTY_PASSWORD = ""
+NUMERIC_PASSWORD = "12345"
+CHAR_PASSWORD = "HaslohaslLo"
+ALPHANUMERIC_PASSWORD = "Haslo12343"
+
 
 engine = create_engine("sqlite:///./fastapi.db")
 SessionTesting = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -51,12 +62,42 @@ def client(app_test, test_session):
 
 
 @pytest.fixture(scope="function")
+def disabled_user(test_session):
+    model = User()
+    model.name = USER_NAME
+    model.email = USER_EMAIL
+    model.password = get_hash_password(USER_PASSWORD)
+    model.updated_at = datetime.datetime.now(datetime.timezone.utc)
+    model.is_active = False
+    test_session.add(model)
+    test_session.commit()
+    test_session.refresh(model)
+    return model
+
+
+@pytest.fixture(scope="function")
 def user(test_session):
     model = User()
     model.name = USER_NAME
     model.email = USER_EMAIL
     model.password = get_hash_password(USER_PASSWORD)
-    model.is_active = False
+    model.updated_at = datetime.datetime.now(datetime.timezone.utc)
+    model.verified_at = datetime.datetime.now(datetime.timezone.utc)
+    model.is_active = True
+    test_session.add(model)
+    test_session.commit()
+    test_session.refresh(model)
+    return model
+
+
+@pytest.fixture(scope="function")
+def unverified_user(test_session):
+    model = User()
+    model.name = USER_NAME
+    model.email = USER_EMAIL
+    model.password = get_hash_password(USER_PASSWORD)
+    model.updated_at = datetime.datetime.now(datetime.timezone.utc)
+    model.is_active = True
     test_session.add(model)
     test_session.commit()
     test_session.refresh(model)

@@ -15,3 +15,5 @@ pydantic[email]
 requests
 fastapi-mail
 Jinja2
+PyJWT
+python-multipart

@@ -20,6 +20,10 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str = f"mysql+pymysql://{MYSQL_USER}:%s@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}" % quote_plus(MYSQL_PASSWORD)
 
+    JWT_SECRET: str = os.getenv("JWT_SECRET")
+    JWT_ALGORITHM: str = os.getenv("ACCESS_TOKEN_ALGORITHM")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES"))
     SECRET_KEY: str = os.getenv("SECRET_KEY")
 
 @lru_cache()
