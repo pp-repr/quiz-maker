@@ -1,14 +1,12 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, status
+from fastapi import APIRouter, BackgroundTasks, Depends, status, Header
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.responses.user import UserResponse, LoginResponse
-from app.schemas.user import RegisterUserRequest, VerifyUserRequest
+from app.schemas.user import RegisterUserRequest, VerifyUserRequest, EmailRequest, ResetRequest
 from app.config.database import get_session
-from app.services.user import create_user_account, activate_user_account, get_login_token
-from app.config.security import oauth2_scheme
-from app.services import user
+from app.services.user import *
 
 
 user_router = APIRouter(
@@ -38,12 +36,24 @@ async def verify_user_account(data: VerifyUserRequest, background_tasks: Backgro
     return JSONResponse({"Message": "Account is activated."})
 
 
-@user_router.post("/login", status_code=status.HTTP_200_OK, response_model=LoginResponse)
+@auth_router.post("/login", status_code=status.HTTP_200_OK, response_model=LoginResponse)
 async def user_login(data: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
     return await get_login_token(data, session)
 
 
-@auth_router.post("/login", status_code=status.HTTP_200_OK, response_model=LoginResponse)
-async def user_login(data: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
-    return await user.get_login_token(data, session)
+@auth_router.post("/refresh", status_code=status.HTTP_200_OK, response_model=LoginResponse)
+async def refresh_token(refresh_token = Header(), session: Session = Depends(get_session)):
+    return await get_refresh_token(refresh_token, session)
+
+
+@auth_router.post("/forgot-password", status_code=status.HTTP_200_OK)
+async def forgot_password(data: EmailRequest, background_tasks: BackgroundTasks, session: Session = Depends(get_session)):
+    await email_forgot_password_link(data, background_tasks, session)
+    return JSONResponse({"message": "A email with password reset link has been sent to you."})
+
+
+@auth_router.put("/reset-password", status_code=status.HTTP_200_OK)
+async def reset_password(data: ResetRequest, session: Session = Depends(get_session)):
+    await reset_user_password(data, session)
+    return JSONResponse({"message": "Your password has been updated."})
     

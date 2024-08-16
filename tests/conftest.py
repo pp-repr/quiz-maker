@@ -12,21 +12,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.main import app
 from app.config.database import Base, get_session
-from app.config.email import fm
 from app.models.user import User
 from app.config.security import get_hash_password
-
-USER_NAME = "Jan Kowalski"
-USER_EMAIL = "kowalski@gmail.com"
-USER_PASSWORD = "Haslo123@"
-INCORRECT_PASSWORD = "Incorrectpassword0!"
-UNREGISTERED_EMAIL = 'Unregistered@email.com'
-INCORRECT_TOKEN = "$2b$12$E0Bt0yZ1rbdVnL4DHJ8HOuulMNe50Vaz/nVMPEhBbEAfAhRDZ/bRS"
-INVALID_EMAIL = "google.com"
-EMPTY_PASSWORD = ""
-NUMERIC_PASSWORD = "12345"
-CHAR_PASSWORD = "HaslohaslLo"
-ALPHANUMERIC_PASSWORD = "Haslo12343"
+from tests.credentials import *
 
 
 engine = create_engine("sqlite:///./fastapi.db")

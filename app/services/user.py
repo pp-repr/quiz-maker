@@ -1,11 +1,12 @@
 from fastapi import HTTPException
 from datetime import datetime, timedelta, timezone
 import logging
+from sqlalchemy.orm import joinedload
 
 from app.models.user import User, UserToken
-from app.config.security import get_hash_password, check_password_strength, get_user_by_email, verify_password, load_user, str_decode, str_encode,generate_token 
-from app.services.email import send_account_verification_email, send_account_activation_confirmation_email
-from app.utils.context import USER_VERIFY_ACCOUNT
+from app.config.security import *
+from app.services.email import *
+from app.utils.context import USER_VERIFY_ACCOUNT, FORGOT_PASSWORD
 from app.utils.string import unique_string
 from app.config.settings import get_settings
 
@@ -42,6 +43,7 @@ async def activate_user_account(data, session, background_tasks):
         token = verify_password(user_token, data.token)
     except Exception as verify_exception:
         logging.exception(verify_exception)
+        token = False
     if not token:
         raise HTTPException(status_code=400, detail="This link expired")
     user.is_active = True
@@ -64,15 +66,28 @@ async def get_login_token(data, session):
         raise HTTPException(status_code=400, detail="Your account is deactivated, contact with support")
     if not user.verified_at:
         raise HTTPException(status_code=400, detail="Your account is not verified, check your email inbox")
-    
-    at_payload, at_expires, rt_payload, rt_expires = create_token_payload(user, session)
-    access_token = generate_token(at_payload, settings.JWT_SECRET, settings.JWT_ALGORITHM, at_expires)
-    refresh_token = generate_token(rt_payload, settings.SECRET_KEY, settings.JWT_ALGORITHM, rt_expires)
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "expires_in": at_expires.seconds
-    }
+
+    return create_token_payload(user, session)
+
+
+async def get_refresh_token(refresh_token, session):
+    payload = get_token_payload(refresh_token, settings.SECRET_KEY, settings.JWT_ALGORITHM)
+    if not payload:
+        raise HTTPException(status_code=400, detail="Invalid request")
+    refresh_key = payload.get('t')
+    access_key = payload.get('a')
+    user_id = str_decode(payload.get('sub'))
+    user_token = session.query(UserToken).options(joinedload(UserToken.user)).filter(UserToken.refresh_key == refresh_key,
+                                                 UserToken.access_key == access_key,
+                                                 UserToken.user_id == user_id,
+                                                 UserToken.expires_at > datetime.now(timezone.utc)
+                                                 ).first()
+    if not user_token:
+        raise HTTPException(status_code=400, detail="Invalid request")
+    user_token.expires_at = datetime.now(timezone.utc)
+    session.add(user_token)
+    session.commit()
+    return create_token_payload(user_token.user, session)
 
 
 def create_token_payload(user, session):
@@ -96,9 +111,58 @@ def create_token_payload(user, session):
         'n': str_encode(f"{user.name}")
     }
     at_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(at_payload, at_expires)
     
     rt_payload = {
         "sub": str_encode(str(user.id)), 
-        "t": refresh_key, 'a': access_key
+        "t": refresh_key, 
+        'a': access_key
         }
-    return at_payload, at_expires, rt_payload, rt_expires
+    refresh_token = create_refresh_token(rt_payload, rt_expires)
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "expires_in": at_expires.seconds
+    }
+
+
+def create_access_token(payload, expires):
+    return generate_token(payload, settings.JWT_SECRET, settings.JWT_ALGORITHM, expires)
+
+
+def create_refresh_token(payload, expires):
+    return generate_token(payload, settings.SECRET_KEY, settings.JWT_ALGORITHM, expires)
+
+
+async def email_forgot_password_link(data, background_tasks, session):
+    user = await load_user(data.email, session)
+    if not user.verified_at:
+        raise HTTPException(status_code=400, detail="Your account is not verified. Please check your email inbox to verify your account.")
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Your account has been dactivated. Please contact support.")
+    await send_password_reset_email(user, background_tasks)
+
+
+async def reset_user_password(data, session):
+    user = await load_user(data.email, session)
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid request")
+    if not user.verified_at:
+        raise HTTPException(status_code=400, detail="Invalid request")
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Invalid request")
+    
+    user_token = user.get_context(FORGOT_PASSWORD)
+    try:
+        token = verify_password(user_token, data.token)
+    except Exception as exec:
+        logging.exception(exec)
+        token = False
+    if not token:
+        raise HTTPException(status_code=400, detail="Invalid window.")
+    
+    user.password = get_hash_password(data.password)
+    user.updated_at = datetime.now()
+    session.add(user)
+    session.commit()
+    session.refresh(user)

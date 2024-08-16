@@ -1,6 +1,4 @@
-from tests.conftest import USER_NAME, USER_EMAIL, USER_PASSWORD, INVALID_EMAIL, EMPTY_PASSWORD, NUMERIC_PASSWORD, CHAR_PASSWORD, ALPHANUMERIC_PASSWORD
-
-
+from tests.credentials import *
 
 def test_create_user(client):
     data = {

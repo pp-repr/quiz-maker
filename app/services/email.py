@@ -41,3 +41,22 @@ async def send_account_activation_confirmation_email(user: User, background_task
         template_name="account-verification-confirmation.html",
         background_tasks=background_tasks
     )
+
+
+async def send_password_reset_email(user: User, background_tasks: BackgroundTasks):
+    context = user.get_context(FORGOT_PASSWORD)
+    token = get_hash_password(context)
+    reset_url = f"{settings.FRONTEND_HOST}/reset-password?token={token}&email={user.email}"
+    data = {
+        'app_name': settings.APP_NAME,
+        "name": user.name,
+        'activate_url': reset_url,
+    }
+    subject = f"Reset Password - {settings.APP_NAME}"
+    await send_email(
+        subject=subject,
+        recipients=[user.email],
+        template_name="password-reset.html",
+        template_body=data,
+        background_tasks=background_tasks
+    )

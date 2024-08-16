@@ -1,4 +1,4 @@
-from tests.conftest import USER_PASSWORD, INCORRECT_PASSWORD, UNREGISTERED_EMAIL
+from tests.credentials import USER_PASSWORD, INCORRECT_PASSWORD, UNREGISTERED_EMAIL
 
 
 def test_user_login(client, user):

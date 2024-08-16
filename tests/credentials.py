@@ -1,0 +1,12 @@
+USER_NAME = "Jan Kowalski"
+USER_EMAIL = "kowalski@gmail.com"
+USER_PASSWORD = "Haslo123@"
+INCORRECT_PASSWORD = "Incorrectpassword0!"
+UNREGISTERED_EMAIL = 'Unregistered@email.com'
+INCORRECT_TOKEN = "$2b$12$E0Bt0yZ1rbdVnL4DHJ8HOuulMNe50Vaz/nVMPEhBbEAfAhRDZ/bRS"
+INVALID_EMAIL = "google.com"
+EMPTY_PASSWORD = ""
+NUMERIC_PASSWORD = "12345"
+CHAR_PASSWORD = "HaslohaslLo"
+ALPHANUMERIC_PASSWORD = "Haslo12343"
+NEW_PASSWORD = "Password123!"
