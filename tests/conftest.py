@@ -14,6 +14,7 @@ from app.main import app
 from app.config.database import Base, get_session
 from app.models.user import User
 from app.config.security import get_hash_password
+from app.services.user import create_token_payload
 from tests.credentials import *
 
 
@@ -90,3 +91,18 @@ def unverified_user(test_session):
     test_session.commit()
     test_session.refresh(model)
     return model
+
+
+@pytest.fixture(scope="function")
+def auth_client(app_test, test_session, user):
+    def test_db():
+        try:
+            yield test_session
+        finally:
+            pass
+
+    app_test.dependency_overrides[get_session] = test_db
+    data = create_token_payload(user, test_session)
+    client = TestClient(app_test)
+    client.headers['Authorization'] = f"Bearer {data['access_token']}"
+    return client

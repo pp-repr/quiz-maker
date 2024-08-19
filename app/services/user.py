@@ -166,3 +166,10 @@ async def reset_user_password(data, session):
     session.add(user)
     session.commit()
     session.refresh(user)
+
+
+async def get_user_details(id, session):
+    user = session.query(User).filter(User.id == id).first()
+    if user:
+        return user
+    raise HTTPException(status_code=400, detail="User does not exists.")

@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.responses.user import UserResponse, LoginResponse
 from app.schemas.user import RegisterUserRequest, VerifyUserRequest, EmailRequest, ResetRequest
 from app.config.database import get_session
+from app.config.security import oauth2_scheme, get_current_user
 from app.services.user import *
 
 
@@ -20,6 +21,14 @@ auth_router = APIRouter(
     prefix="/auth",
     tags=["Auth"],
     responses={404: {"desription": "Not found"}}
+)
+
+
+user_auth_router = APIRouter(
+    prefix="/users",
+    tags=["Users"],
+    responses={404: {"desription": "Not found"}},
+    dependencies=[Depends(oauth2_scheme), Depends(get_current_user)]
 )
 
  
@@ -56,4 +65,14 @@ async def forgot_password(data: EmailRequest, background_tasks: BackgroundTasks,
 async def reset_password(data: ResetRequest, session: Session = Depends(get_session)):
     await reset_user_password(data, session)
     return JSONResponse({"message": "Your password has been updated."})
+
+
+@user_auth_router.get("/me", status_code=status.HTTP_200_OK, response_model=UserResponse)
+async def get_user(user = Depends(get_current_user)):
+    return user
+
+
+@user_auth_router.get("/{id}", status_code=status.HTTP_200_OK, response_model=UserResponse)
+async def get_user_by_id(id, session: Session = Depends(get_session)):
+    return await get_user_details(id, session)
     
