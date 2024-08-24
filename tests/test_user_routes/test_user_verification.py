@@ -1,7 +1,7 @@
 import time
 from app.utils.context import USER_VERIFY_ACCOUNT
-from app.config.security import get_hash_password
-from app.config.security import get_user_by_email
+from app.auth.utils import get_hash_password
+from app.services.user import get_user_by_email
 from tests.credentials import INCORRECT_TOKEN, UNREGISTERED_EMAIL
 
 

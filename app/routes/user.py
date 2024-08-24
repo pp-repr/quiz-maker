@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.responses.user import UserResponse, LoginResponse
 from app.schemas.user import RegisterUserRequest, VerifyUserRequest, EmailRequest, ResetRequest
 from app.config.database import get_session
-from app.config.security import oauth2_scheme, get_current_user
+from app.auth.user import *
 from app.services.user import *
 
 

@@ -1,4 +1,4 @@
-from app.services.user import create_token_payload
+from app.auth.user import create_token_payload
 from tests.credentials import INCORRECT_TOKEN
 
 

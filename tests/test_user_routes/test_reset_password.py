@@ -1,4 +1,4 @@
-from app.config.security import get_hash_password
+from app.auth.utils import get_hash_password
 from app.utils.context import FORGOT_PASSWORD
 from tests.credentials import NEW_PASSWORD, INCORRECT_TOKEN, INVALID_EMAIL, UNREGISTERED_EMAIL
 

@@ -13,8 +13,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.main import app
 from app.config.database import Base, get_session
 from app.models.user import User
-from app.config.security import get_hash_password
-from app.services.user import create_token_payload
+from app.auth.user import create_token_payload
+from app.auth.utils import get_hash_password
 from tests.credentials import *
 
 
