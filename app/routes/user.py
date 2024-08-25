@@ -1,10 +1,10 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, status, Header
+from fastapi import APIRouter, BackgroundTasks, Depends, status, Header, File, UploadFile
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.responses.user import UserResponse, LoginResponse
-from app.schemas.user import RegisterUserRequest, VerifyUserRequest, EmailRequest, ResetRequest
+from app.schemas.user import *
 from app.config.database import get_session
 from app.auth.user import *
 from app.services.user import *
@@ -75,4 +75,16 @@ async def get_user(user = Depends(get_current_user)):
 @user_auth_router.get("/{id}", status_code=status.HTTP_200_OK, response_model=UserResponse)
 async def get_user_by_id(id, session: Session = Depends(get_session)):
     return await get_user_details(id, session)
-    
+
+
+@user_auth_router.put("/me/edit", status_code=status.HTTP_200_OK, response_model=UserResponse)
+async def update_profile(data: UpdateProfileRequest, user = Depends(get_current_user), session: Session = Depends(get_session)):
+    updated_user = await update_user_profile(user.email, data, session)
+    return updated_user
+
+
+@user_router.put("/me/profile-image", status_code=status.HTTP_200_OK, response_model=UserResponse)
+async def update_avatar(file: UploadFile = File(...), user = Depends(get_current_user), session: Session = Depends(get_session)):
+    updated_user = await save_user_avatar(user.email, file, session)
+    return updated_user
+   

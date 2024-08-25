@@ -7,9 +7,11 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(20), index=True)
-    email = Column(String(40), unique=True, index=True)
-    mobile = Column(String(20), index=True)
+    name = Column(String(50), index=True)
+    email = Column(String(100), unique=True, index=True)
+    mobile = Column(String(9), index=True)
+    description = Column(String(1000))
+    image_url = Column(String(1000), nullable=True)
     password = Column(String(100))
     is_active = Column(Boolean, default=False)
     verified_at = Column(DateTime, nullable=True, default=None)

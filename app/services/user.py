@@ -1,11 +1,14 @@
 from fastapi import HTTPException
 from datetime import datetime, timezone
 import logging
+import os
+import shutil
 
 from app.services.email import *
 from app.utils.context import USER_VERIFY_ACCOUNT, FORGOT_PASSWORD
 from app.config.settings import get_settings
-from app.auth.utils import verify_password, check_password_strength
+from app.auth.utils import verify_password, check_password_strength, str_encode
+from app.schemas.user import *
 
 
 settings = get_settings()
@@ -111,3 +114,36 @@ async def get_user_details(id, session):
     if user:
         return user
     raise HTTPException(status_code=400, detail="User does not exists.")
+
+
+async def update_user_profile(email, data, session):
+    user = await load_user(email, session)
+    user = await update_user_fields(user, data)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+async def update_user_fields(user, data):
+    if data.name is not None:
+        user.name = data.name
+    if data.mobile is not None:
+        user.mobile = data.mobile
+    if data.description is not None:
+        user.description = data.description
+    return user
+
+
+async def save_user_avatar(email, file, session):
+    try:
+        file_location = f"app/static/profile-images/{str_encode(email)}/{file.filename}"
+        os.makedirs(os.path.dirname(file_location), exist_ok=True)
+        with open(file_location, "wb") as f:
+            shutil.copyfileobj(file.file, f)
+        user = await load_user(email, session)
+        user.image_url = file_location
+        session.commit()
+        session.refresh(user)
+        return user
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")

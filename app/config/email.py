@@ -17,7 +17,7 @@ conf = ConnectionConfig(
     USE_CREDENTIALS = os.getenv("USE_CREDENTIALS"),
     MAIL_DEBUG=True,
     MAIL_FROM_NAME=settings.APP_NAME,
-    TEMPLATE_FOLDER=Path(__file__).parent.parent / "templates"
+    TEMPLATE_FOLDER= "app/static/templates"
 )
 
 

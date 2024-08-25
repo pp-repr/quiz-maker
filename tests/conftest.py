@@ -51,6 +51,21 @@ def client(app_test, test_session):
 
 
 @pytest.fixture(scope="function")
+def auth_client(app_test, test_session, user):
+    def test_db():
+        try:
+            yield test_session
+        finally:
+            pass
+
+    app_test.dependency_overrides[get_session] = test_db
+    data = create_token_payload(user, test_session)
+    client = TestClient(app_test)
+    client.headers['Authorization'] = f"Bearer {data['access_token']}"
+    return client
+
+
+@pytest.fixture(scope="function")
 def disabled_user(test_session):
     model = User()
     model.name = USER_NAME
@@ -94,15 +109,17 @@ def unverified_user(test_session):
 
 
 @pytest.fixture(scope="function")
-def auth_client(app_test, test_session, user):
-    def test_db():
-        try:
-            yield test_session
-        finally:
-            pass
-
-    app_test.dependency_overrides[get_session] = test_db
-    data = create_token_payload(user, test_session)
-    client = TestClient(app_test)
-    client.headers['Authorization'] = f"Bearer {data['access_token']}"
-    return client
+def user_with_update_profile(test_session):
+    model = User()
+    model.name = USER_NAME
+    model.email = USER_EMAIL
+    model.mobile = USER_MOBILE
+    model.description = USER_DESCRIPTION
+    model.password = get_hash_password(USER_PASSWORD)
+    model.updated_at = datetime.datetime.now(datetime.timezone.utc)
+    model.verified_at = datetime.datetime.now(datetime.timezone.utc)
+    model.is_active = True
+    test_session.add(model)
+    test_session.commit()
+    test_session.refresh(model)
+    return model
