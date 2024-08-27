@@ -84,7 +84,7 @@ async def update_profile(data: UpdateProfileRequest, user = Depends(get_current_
 
 
 @user_router.put("/me/profile-image", status_code=status.HTTP_200_OK, response_model=UserResponse)
-async def update_avatar(file: UploadFile = File(...), user = Depends(get_current_user), session: Session = Depends(get_session)):
-    updated_user = await save_user_avatar(user.email, file, session)
+async def update_image(file: UploadFile = File(...), user = Depends(get_current_user), session: Session = Depends(get_session)):
+    updated_user = await save_user_image(user.email, file, session)
     return updated_user
    

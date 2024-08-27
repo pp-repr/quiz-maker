@@ -2,5 +2,7 @@
 .env
 .dockerignore
 alembic/versions/*.py
+app/static/profile-images/*
 
 !alembic/versions/
+!app/static/profile-images/

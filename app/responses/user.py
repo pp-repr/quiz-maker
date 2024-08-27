@@ -4,6 +4,7 @@ from typing import Optional
 from pydantic import EmailStr
 
 from app.responses.base import BaseResponse
+from app.models.enums import Role
 
 
 class UserResponse(BaseResponse):
@@ -14,6 +15,7 @@ class UserResponse(BaseResponse):
     description: Optional[str] = None
     image_url: Optional[str] = None
     is_active: bool
+    role: Role
     created_at: Union[str, None, datetime] = None
 
 

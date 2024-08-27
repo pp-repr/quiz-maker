@@ -134,7 +134,7 @@ async def update_user_fields(user, data):
     return user
 
 
-async def save_user_avatar(email, file, session):
+async def save_user_image(email, file, session):
     try:
         file_location = f"app/static/profile-images/{str_encode(email)}/{file.filename}"
         os.makedirs(os.path.dirname(file_location), exist_ok=True)
