@@ -15,6 +15,7 @@ from app.config.database import Base, get_session
 from app.models.user import User
 from app.auth.user import create_token_payload
 from app.auth.utils import get_hash_password
+from app.models.enums import Role
 from tests.credentials import *
 
 
@@ -73,6 +74,7 @@ def disabled_user(test_session):
     model.password = get_hash_password(USER_PASSWORD)
     model.updated_at = datetime.datetime.now(datetime.timezone.utc)
     model.is_active = False
+    model.role = Role.USER
     test_session.add(model)
     test_session.commit()
     test_session.refresh(model)
@@ -88,6 +90,23 @@ def user(test_session):
     model.updated_at = datetime.datetime.now(datetime.timezone.utc)
     model.verified_at = datetime.datetime.now(datetime.timezone.utc)
     model.is_active = True
+    model.role = Role.USER
+    test_session.add(model)
+    test_session.commit()
+    test_session.refresh(model)
+    return model
+
+
+@pytest.fixture(scope="function")
+def admin(test_session):
+    model = User()
+    model.name = ADMIN_NAME
+    model.email = ADMIN_EMAIL
+    model.password = get_hash_password(ADMIN_PASSWORD)
+    model.updated_at = datetime.datetime.now(datetime.timezone.utc)
+    model.verified_at = datetime.datetime.now(datetime.timezone.utc)
+    model.is_active = True
+    model.role = Role.ADMIN
     test_session.add(model)
     test_session.commit()
     test_session.refresh(model)
@@ -102,6 +121,7 @@ def unverified_user(test_session):
     model.password = get_hash_password(USER_PASSWORD)
     model.updated_at = datetime.datetime.now(datetime.timezone.utc)
     model.is_active = True
+    model.role = Role.USER
     test_session.add(model)
     test_session.commit()
     test_session.refresh(model)
@@ -119,6 +139,7 @@ def user_with_update_profile(test_session):
     model.updated_at = datetime.datetime.now(datetime.timezone.utc)
     model.verified_at = datetime.datetime.now(datetime.timezone.utc)
     model.is_active = True
+    model.role = Role.USER
     test_session.add(model)
     test_session.commit()
     test_session.refresh(model)

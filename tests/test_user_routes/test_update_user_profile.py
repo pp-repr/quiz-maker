@@ -43,7 +43,7 @@ def test_edit_user_profile(client, user_with_update_profile, test_session):
 
 def test_update_user_name(auth_client, user):
     update_data = {
-        "name": NEW_NAME,
+        "name": NEW_NAME
     }
     response = auth_client.put(
         "/users/me/edit",
@@ -58,7 +58,7 @@ def test_update_user_name(auth_client, user):
 
 def test_update_user_mobile(auth_client, user):
     update_data = {
-        "mobile": NEW_MOBILE,
+        "mobile": NEW_MOBILE
     }
     response = auth_client.put(
         "/users/me/edit",
