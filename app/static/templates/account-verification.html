@@ -1,16 +1,67 @@
 <!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activate Your Account - {{ app_name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            text-align: center;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.5;
+            margin: 20px 0;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .button {
+            background-color: #28a745;
+            color: #fff;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            display: inline-block;
+        }
+        .button:hover {
+            background-color: #218838;
+        }
+        .link {
+            color: #007BFF;
+            word-break: break-all;
+        }
+    </style>
 </head>
 <body>
-    <div>
+    <div class="container">
         <h1>Welcome to {{ app_name }}!</h1>
         <p>Dear {{ name }},</p>
-        <p>Thank you for signing up. Please activate your account by clicking the link below:</p>
-        <p>
+        <p>Thank you for signing up. Please activate your account by clicking the button below:</p>
+        <div class="button-container">
             <a href="{{ activate_url }}" class="button">Activate Account</a>
-        </p>
+        </div>
         <p>If the button above doesn't work, please copy and paste the following URL into your browser:</p>
-        <p><a href="{{ activate_url }}">{{ activate_url }}</a></p>
+        <p><a href="{{ activate_url }}" class="link">{{ activate_url }}</a></p>
     </div>
 </body>
 </html>

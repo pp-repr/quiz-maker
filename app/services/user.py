@@ -125,12 +125,9 @@ async def update_user_profile(email, data, session):
 
 
 async def update_user_fields(user, data):
-    if data.name is not None:
-        user.name = data.name
-    if data.mobile is not None:
-        user.mobile = data.mobile
-    if data.description is not None:
-        user.description = data.description
+    update_data = data.model_dump(exclude_unset=True) 
+    for key, value in update_data.items():
+        setattr(user, key, value)
     return user
 
 

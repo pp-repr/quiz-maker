@@ -1,21 +1,32 @@
 from fastapi import APIRouter, status, Depends
+from sqlalchemy.orm import Session
 
-from app.services.admin import require_role
+from app.services.admin import require_role, delete_user_account
 from app.models.enums import Role
+from app.schemas.user import DeleteRequest
+from app.config.database import get_session
 
 
 admin_router = APIRouter(
     prefix="/admin",
     tags=["Admin"],
-    responses={404: {"desription": "Not found"}}
+    responses={404: {"desription": "Not found"}},
+    dependencies=[Depends(require_role(Role.ADMIN))]
 )
 
 
-@admin_router.get("/", status_code=status.HTTP_200_OK, response_model=dict)
-async def get_admin(user = Depends(require_role(Role.ADMIN))):
-    return {"hello": user.role}
+@admin_router.get("/", response_model=dict)
+async def get_admin():
+    return {"hello": "admin"}
 
 
-@admin_router.get("/moderator", status_code=status.HTTP_200_OK, response_model=dict)
-async def get_moderator(user = Depends(require_role(Role.MODERATOR))):
-    return {"hello": user.role}
+@admin_router.delete("/delete-user")
+async def delete_user(data: DeleteRequest,
+                      session: Session = Depends(get_session)):
+    await delete_user_account(data.email, session)
+    return {"message": "User deleted successfully"}   
+
+
+# @admin_router.get("/moderator", response_model=dict)
+# async def get_moderator(user = Depends(require_role(Role.MODERATOR))):
+#     return {"hello": user.role}

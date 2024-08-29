@@ -8,7 +8,7 @@ def test_update_user_profile(auth_client):
         "mobile": NEW_MOBILE,
         "description": NEW_DESCRIPTION
     }
-    response = auth_client.put(
+    response = auth_client.patch(
         "/users/me/edit",
         json=update_data,
     )
@@ -29,7 +29,7 @@ def test_edit_user_profile(client, user_with_update_profile, test_session):
         "mobile": NEW_MOBILE,
         "description": NEW_DESCRIPTION
     }
-    response = client.put(
+    response = client.patch(
         "/users/me/edit",
         json=update_data,
         headers=header
@@ -45,7 +45,7 @@ def test_update_user_name(auth_client, user):
     update_data = {
         "name": NEW_NAME
     }
-    response = auth_client.put(
+    response = auth_client.patch(
         "/users/me/edit",
         json=update_data,
     )
@@ -60,7 +60,7 @@ def test_update_user_mobile(auth_client, user):
     update_data = {
         "mobile": NEW_MOBILE
     }
-    response = auth_client.put(
+    response = auth_client.patch(
         "/users/me/edit",
         json=update_data,
     )
@@ -75,7 +75,7 @@ def test_update_user_description(auth_client, user):
     update_data = {
         "description": NEW_DESCRIPTION
     }
-    response = auth_client.put(
+    response = auth_client.patch(
         "/users/me/edit",
         json=update_data,
     )
@@ -92,7 +92,7 @@ def test_update_profile_unauthorized(client):
         "mobile": NEW_MOBILE,
         "description": NEW_DESCRIPTION
     }
-    response = client.put(
+    response = client.patch(
         "/users/me/edit",
         json=update_data,
     )

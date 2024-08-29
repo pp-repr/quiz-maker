@@ -1,7 +1,0 @@
-
-def test_update_profile_image(auth_client):
-    image_content = b"fake image data"
-    files = {'file': ('avatar.png', image_content, 'image/png')}
-    response = auth_client.put("/me/profile-image", files=files)
-    assert response.status_code == 200
-    assert response.json()["image_url"] is not None

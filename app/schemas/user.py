@@ -28,3 +28,6 @@ class UpdateProfileRequest(BaseModel):
     mobile: Optional[str] = Field(None, max_length=9)
     description: Optional[str] = Field(None, max_length=1000)
 
+
+class DeleteRequest(BaseModel):
+    email: EmailStr

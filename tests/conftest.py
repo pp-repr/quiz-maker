@@ -67,6 +67,21 @@ def auth_client(app_test, test_session, user):
 
 
 @pytest.fixture(scope="function")
+def auth_admin_client(app_test, test_session, admin):
+    def test_db():
+        try:
+            yield test_session
+        finally:
+            pass
+
+    app_test.dependency_overrides[get_session] = test_db
+    data = create_token_payload(admin, test_session)
+    client = TestClient(app_test)
+    client.headers['Authorization'] = f"Bearer {data['access_token']}"
+    return client
+
+
+@pytest.fixture(scope="function")
 def disabled_user(test_session):
     model = User()
     model.name = USER_NAME
@@ -136,6 +151,22 @@ def user_with_update_profile(test_session):
     model.mobile = USER_MOBILE
     model.description = USER_DESCRIPTION
     model.password = get_hash_password(USER_PASSWORD)
+    model.updated_at = datetime.datetime.now(datetime.timezone.utc)
+    model.verified_at = datetime.datetime.now(datetime.timezone.utc)
+    model.is_active = True
+    model.role = Role.USER
+    test_session.add(model)
+    test_session.commit()
+    test_session.refresh(model)
+    return model
+
+
+@pytest.fixture(scope="function")
+def user_to_delete(test_session):
+    model = User()
+    model.name = DELETE_NAME
+    model.email = DELETE_EMAIL
+    model.password = get_hash_password(DELETE_PASSWORD)
     model.updated_at = datetime.datetime.now(datetime.timezone.utc)
     model.verified_at = datetime.datetime.now(datetime.timezone.utc)
     model.is_active = True

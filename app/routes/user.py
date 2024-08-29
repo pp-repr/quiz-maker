@@ -77,7 +77,7 @@ async def get_user_by_id(id, session: Session = Depends(get_session)):
     return await get_user_details(id, session)
 
 
-@user_auth_router.put("/me/edit", status_code=status.HTTP_200_OK, response_model=UserResponse)
+@user_auth_router.patch("/me/edit", status_code=status.HTTP_200_OK, response_model=UserResponse)
 async def update_profile(data: UpdateProfileRequest, user = Depends(get_current_user), session: Session = Depends(get_session)):
     updated_user = await update_user_profile(user.email, data, session)
     return updated_user
