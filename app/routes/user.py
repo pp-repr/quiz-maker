@@ -72,9 +72,10 @@ async def get_user(user = Depends(get_current_user)):
     return user
 
 
-@user_auth_router.get("/{id}", status_code=status.HTTP_200_OK, response_model=UserResponse)
-async def get_user_by_id(id, session: Session = Depends(get_session)):
-    return await get_user_details(id, session)
+@user_auth_router.get("/{id}", status_code=status.HTTP_200_OK, response_model=dict)
+async def get_another_user(id, session: Session = Depends(get_session)):
+    fields = ['name', 'description', 'image_url', 'is_active', 'created_at']
+    return await get_user_details(id, session, fields)
 
 
 @user_auth_router.patch("/me/edit", status_code=status.HTTP_200_OK, response_model=UserResponse)

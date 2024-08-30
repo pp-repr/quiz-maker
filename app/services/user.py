@@ -18,6 +18,15 @@ def get_user_by_email(email, session):
     return session.query(User).filter(User.email==email).first()
 
 
+async def get_user_by_id(id, session):
+    try:
+        user = session.query(User).filter(User.id==id).first()
+    except Exception as user_exec:
+        logging.info(f"User Not Found, Id: {id}")
+        user = None
+    return user
+
+
 async def create_user_account(data, session, background_tasks):
     validate_user_data(data, session)
     user = User(
@@ -109,11 +118,13 @@ async def validate_user_for_password_reset(email, session):
     return user
 
 
-async def get_user_details(id, session):
-    user = session.query(User).filter(User.id == id).first()
-    if user:
+async def get_user_details(id, session, fields):   
+    user = await get_user_by_id(id, session)
+    if fields == "all": 
         return user
-    raise HTTPException(status_code=400, detail="User does not exists.")
+    else:
+        user_data = {field: getattr(user, field) for field in fields}
+        return user_data
 
 
 async def update_user_profile(email, data, session):

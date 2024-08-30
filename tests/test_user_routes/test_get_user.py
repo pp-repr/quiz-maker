@@ -23,7 +23,6 @@ def test_get_user_with_incorrect_token(client, user, test_session):
     assert 'id' not in response.json()
 
 
-def test_get_user_details_by_id(auth_client, user):
+def test_get_user_details_by_email(auth_client, user):
     response = auth_client.get(f"/users/{user.id}")
     assert response.status_code == 200
-    assert response.json()['email'] == user.email
