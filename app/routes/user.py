@@ -8,6 +8,7 @@ from app.schemas.user import *
 from app.config.database import get_session
 from app.auth.user import *
 from app.services.user import *
+from app.services.admin import get_user_details
 
 
 user_router = APIRouter(

@@ -103,7 +103,7 @@ def admin(test_session):
     admin_password = get_hash_password(ADMIN_PASSWORD)
     return create_user(session=test_session,
                        name=ADMIN_NAME,
-                       email=ADMIN_NAME,
+                       email=ADMIN_EMAIL,
                        password=admin_password,
                        role=Role.ADMIN)
 
