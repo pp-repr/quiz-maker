@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, Depends
 from sqlalchemy.orm import Session
-from typing import List, Literal
+from typing import List
 
 from app.services.admin import *
 from app.models.enums import Role

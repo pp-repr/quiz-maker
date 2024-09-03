@@ -34,7 +34,7 @@ user_auth_router = APIRouter(
 
  
 @user_router.post("/", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
-async def register_user(data: RegisterUserRequest, background_tasks: BackgroundTasks,
+async def register_user(background_tasks: BackgroundTasks, data: RegisterUserRequest = Depends(RegisterUserRequest.form),
                         session: Session = Depends(get_session)):
     """
     Register a new user using details such as name, email, and password, and store this information in the database. Upon successful
@@ -49,7 +49,7 @@ async def register_user(data: RegisterUserRequest, background_tasks: BackgroundT
 
 
 @user_router.post("/verify", status_code=status.HTTP_200_OK)
-async def verify_user_account(data: VerifyUserRequest, background_tasks: BackgroundTasks,
+async def verify_user_account( background_tasks: BackgroundTasks, data: VerifyUserRequest = Depends(VerifyUserRequest.form),
                         session: Session = Depends(get_session)):
     """
     Verify the new user account
@@ -81,7 +81,7 @@ async def refresh_token(refresh_token = Header(), session: Session = Depends(get
 
 
 @auth_router.post("/forgot-password", status_code=status.HTTP_200_OK)
-async def forgot_password(data: EmailRequest, background_tasks: BackgroundTasks, session: Session = Depends(get_session)):
+async def forgot_password(background_tasks: BackgroundTasks, data: EmailRequest = Depends(EmailRequest.form), session: Session = Depends(get_session)):
     """
     Endpoint allows users to initiate a password reset process if they have forgotten their current password
     
@@ -92,7 +92,7 @@ async def forgot_password(data: EmailRequest, background_tasks: BackgroundTasks,
 
 
 @auth_router.put("/reset-password", status_code=status.HTTP_200_OK)
-async def reset_password(data: ResetRequest, session: Session = Depends(get_session)):
+async def reset_password(data: ResetRequest = Depends(ResetRequest.form), session: Session = Depends(get_session)):
     """
     Change your password using the token received in the email
     
@@ -125,7 +125,7 @@ async def get_another_user(id, session: Session = Depends(get_session)):
 
 
 @user_auth_router.patch("/me/edit", status_code=status.HTTP_200_OK, response_model=UserResponse)
-async def update_profile(data: UpdateProfileRequest, user = Depends(get_current_user), session: Session = Depends(get_session)):
+async def update_profile(data: UpdateProfileRequest = Depends(UpdateProfileRequest.form), user = Depends(get_current_user), session: Session = Depends(get_session)):
     """
     Edit basic information about the user, all fields are optional; you can change just one or two if you wish
 
