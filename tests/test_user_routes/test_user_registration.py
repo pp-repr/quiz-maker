@@ -6,7 +6,7 @@ def test_create_user(client):
         "email": USER_EMAIL,
         "password": USER_PASSWORD
     }
-    response = client.post('/users', json=data)
+    response = client.post('/users', data=data, headers=HEADER)
     assert response.status_code == 201
     assert "password" not in response.json()
 
@@ -17,7 +17,7 @@ def test_create_user_with_invalid_email(client):
         "email": INVALID_EMAIL,
         "password": USER_PASSWORD
     }
-    response = client.post('/users', json=data)
+    response = client.post('/users', data=data, headers=HEADER)
     assert response.status_code != 201
 
 
@@ -27,7 +27,7 @@ def test_create_user_with_existing_email(client, disabled_user):
         "email": disabled_user.email,
         "password": USER_PASSWORD
     }
-    response = client.post('/users', json=data)
+    response = client.post('/users', data=data, headers=HEADER)
     assert response.status_code != 201
 
 
@@ -37,7 +37,7 @@ def test_create_user_with_empty_password(client):
         "email": USER_EMAIL,
         "password": EMPTY_PASSWORD
     }
-    response = client.post("/users/", json=data)
+    response = client.post("/users/", data=data, headers=HEADER)
     assert response.status_code != 201
 
 
@@ -47,7 +47,7 @@ def test_create_user_with_numeric_password(client):
         "email": USER_EMAIL,
         "password": NUMERIC_PASSWORD
     }
-    response = client.post("/users/", json=data)
+    response = client.post("/users/", data=data, headers=HEADER)
     assert response.status_code != 201
 
 
@@ -57,7 +57,7 @@ def test_create_user_with_char_password(client):
         "email": USER_EMAIL,
         "password": CHAR_PASSWORD
     }
-    response = client.post("/users/", json=data)
+    response = client.post("/users/", data=data, headers=HEADER)
     assert response.status_code != 201
 
 
@@ -67,5 +67,5 @@ def test_create_user_with_alphanumeric_password(client):
         "email": USER_EMAIL,
         "password": ALPHANUMERIC_PASSWORD
     }
-    response = client.post("/users/", json=data)
+    response = client.post("/users/", data=data, headers=HEADER)
     assert response.status_code != 201

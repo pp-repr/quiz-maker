@@ -118,9 +118,10 @@ async def update_user_profile(email, data, session):
 
 
 async def update_user_fields(user, data):
-    update_data = data.model_dump(exclude_unset=True) 
+    update_data = data.model_dump() 
     for key, value in update_data.items():
-        setattr(user, key, value)
+         if value is not None:
+            setattr(user, key, value)
     return user
 
 

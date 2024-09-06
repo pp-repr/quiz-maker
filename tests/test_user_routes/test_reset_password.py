@@ -1,6 +1,6 @@
 from app.auth.utils import get_hash_password
 from app.utils.context import FORGOT_PASSWORD
-from tests.credentials import NEW_PASSWORD, INCORRECT_TOKEN, INVALID_EMAIL, UNREGISTERED_EMAIL
+from tests.credentials import NEW_PASSWORD, INCORRECT_TOKEN, INVALID_EMAIL, UNREGISTERED_EMAIL, HEADER
 
 
 def get_token(user):
@@ -14,7 +14,7 @@ def test_reset_password(client, user):
         "email": user.email,
         "password": NEW_PASSWORD
     }
-    response = client.put("/auth/reset-password", json=data)
+    response = client.put("/auth/reset-password", data=data, headers=HEADER)
     assert response.status_code == 200
     del data['token']
     del data['email']
@@ -29,7 +29,7 @@ def test_reset_password_invalid_token(client, user):
         "email": user.email,
         "password": NEW_PASSWORD
     }
-    response = client.put("/auth/reset-password", json=data)
+    response = client.put("/auth/reset-password", data=data, headers=HEADER)
     assert response.status_code == 400
     del data['token']
     del data['email']
@@ -44,7 +44,7 @@ def test_reset_password_invalid_email(client, user):
         "email": INVALID_EMAIL,
         "password": NEW_PASSWORD
     }
-    response = client.put("/auth/reset-password", json=data)
+    response = client.put("/auth/reset-password", data=data, headers=HEADER)
     assert response.status_code == 422
     del data['token']
     del data['email']
@@ -59,7 +59,7 @@ def test_reset_password_unregistered_email(client, user):
         "email": UNREGISTERED_EMAIL,
         "password": NEW_PASSWORD
     }
-    response = client.put("/auth/reset-password", json=data)
+    response = client.put("/auth/reset-password", data=data, headers=HEADER)
     assert response.status_code == 400
     del data['token']
     del data['email']

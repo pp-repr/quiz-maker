@@ -2,7 +2,7 @@ import time
 from app.utils.context import USER_VERIFY_ACCOUNT
 from app.auth.utils import get_hash_password
 from app.services.user import get_user_by_email
-from tests.credentials import INCORRECT_TOKEN, UNREGISTERED_EMAIL
+from tests.credentials import INCORRECT_TOKEN, UNREGISTERED_EMAIL, HEADER
 
 
 def test_user_account_verification(client, disabled_user, test_session):
@@ -12,7 +12,7 @@ def test_user_account_verification(client, disabled_user, test_session):
         "email": disabled_user.email,
         "token": token
     }
-    response = client.post('/users/verify', json=data)
+    response = client.post('/users/verify', data=data, headers=HEADER)
     assert response.status_code == 200
     activated_user = get_user_by_email(disabled_user.email, test_session)
     assert activated_user.is_active is True
@@ -24,7 +24,7 @@ def test_user_account_verification_with_invalid_token(client, disabled_user, tes
         "email": disabled_user.email,
         "token": INCORRECT_TOKEN
     }
-    response = client.post('/users/verify', json=data)
+    response = client.post('/users/verify', data=data, headers=HEADER)
     assert response.status_code != 200
     activated_user = get_user_by_email(disabled_user.email, test_session)
     assert activated_user.is_active is False
@@ -38,7 +38,7 @@ def test_user_account_verification_with_invalid_email(client, disabled_user, tes
         "email": UNREGISTERED_EMAIL,
         "token": token
     }
-    response = client.post('/users/verify', json=data)
+    response = client.post('/users/verify', data=data, headers=HEADER)
     assert response.status_code != 200
     activated_user = get_user_by_email(disabled_user.email, test_session)
     assert activated_user.is_active is False
@@ -53,7 +53,7 @@ def test_user_account_verification_twice(client, disabled_user, test_session):
         "email": disabled_user.email,
         "token": token
     }
-    response = client.post('/users/verify', json=data)
+    response = client.post('/users/verify', data=data, headers=HEADER)
     assert response.status_code == 200
-    response = client.post('/users/verify', json=data)
+    response = client.post('/users/verify', data=data, headers=HEADER)
     assert response.status_code != 200
