@@ -22,6 +22,7 @@ class User(Base):
     updated_at = Column(DateTime, nullable=True, default=None, onupdate=datetime.now)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     tokens = relationship("UserToken", back_populates="user")
+    quiz = relationship("Quiz", back_populates="user")
 
     def get_context(self, context: str):
         return f"{context}{self.password[-6:]}{self.updated_at.strftime('%m%d%Y%H%M%S')}".strip()

@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES"))
     SECRET_KEY: str = os.getenv("SECRET_KEY")
 
+    SESSION_KEY: str = os.getenv("SESSION_KEY")
+
 @lru_cache()
 def get_settings() -> Settings:
     return Settings()

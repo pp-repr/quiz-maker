@@ -17,3 +17,5 @@ fastapi-mail
 Jinja2
 PyJWT
 python-multipart
+itsdangerous
+g4f[all]
