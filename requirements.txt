@@ -18,4 +18,4 @@ Jinja2
 PyJWT
 python-multipart
 itsdangerous
-g4f[all]
+google-generativeai

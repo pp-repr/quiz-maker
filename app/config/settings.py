@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     SECRET_KEY: str = os.getenv("SECRET_KEY")
 
     SESSION_KEY: str = os.getenv("SESSION_KEY")
+    GOOGLE_KEY: str = os.getenv("GOOGLE_KEY")
+    
 
 @lru_cache()
 def get_settings() -> Settings:
