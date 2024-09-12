@@ -3,6 +3,27 @@ html, body {
     margin: 0;
     background-color: #121212;
     color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.footer {
+    background-color: #1f1f1f;
+    box-shadow: 0 -4px 10px -2px #bb86fc;
+    text-align: center;
+    padding: 10px;
+    width: 100%;
+}
+
+.footer p {
+    color: #bbb;
+    margin: 0;
 }
 
 .navbar {
@@ -24,7 +45,7 @@ html, body {
 
 .container {
     background-image: url('/static/css/img/img.webp');
-    background-size: cover;
+    background-size: 100% auto;
     background-repeat: repeat-y;
     padding: 20px;
     margin-top: 5%;
@@ -86,16 +107,6 @@ html, body {
     background-color: #2a2a2a;
 }
 
-.footer p {
-    color: #bbb;
-    margin: 0;
-}
-
-.footer {
-    background-color: #1f1f1f; 
-    box-shadow: 0 -4px 10px -2px #bb86fc;
-}
-
 form {
     background-color: #1f1f1f;
     border-radius: 15px;
@@ -141,6 +152,44 @@ button:hover {
         width: 90%;
         height: 80%;
     }
+ 
+}
 
-    
+.result-item {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+}
+.correct {
+    background-color: #28a745; /* zielony */
+}
+.incorrect {
+    background-color: #dc3545; /* czerwony */
+}
+.key {
+    font-weight: bold;
+}
+.details {
+    display: none;
+    padding: 10px;
+    background-color: #f8f9fa;
+    color: #000;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+.details.show {
+    display: block;
+}
+.user-answer {
+    color: #dc3545; /* czerwony */
+    font-weight: bold;
+}
+.correct-answer {
+    color: #28a745; /* zielony */
+    font-weight: bold;
+}
+.highlight {
+    font-weight: bold;
 }

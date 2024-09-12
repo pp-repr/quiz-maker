@@ -29,8 +29,9 @@ async def quiz(request: Request, text: str = Form(...)):
 @router.get("/quiz")
 async def get_text(request: Request):
     text = request.session.get("submitted_text", None)
-    output = create_output(text)
-    questions, correct_answers = parse_quiz(output)
+    output = await create_output(text)
+    questions, correct_answers = await parse_quiz(output)
+    request.session["questions"] = questions
     request.session["correct_answers"] = correct_answers
     return templates.TemplateResponse("quiz.html", {"request": request, "questions": questions})
 
@@ -39,15 +40,8 @@ async def get_text(request: Request):
 async def submit_quiz(request: Request):
     form_data = await request.form()
     user_answers = {key: form_data[key] for key in form_data}
-    # correct_answers = request.session.get("correct_answers", None)
-    # to do
-    request.session["user_answers"] = user_answers
-    return {"message": "Dziękujemy za wypełnienie quizu!", "user_answers": user_answers}
-
-
-@router.get("/submit")
-async def get_submit_quiz(request: Request):
     correct_answers = request.session.get("correct_answers", None)
-    user_answers = request.session.get("user_answers", None)
-    # to do
-    return "correct answers: ", correct_answers, "user answers: ", user_answers
+    questions = request.session.get("questions", None)
+    results = await check_answers(user_answers, correct_answers)
+    return templates.TemplateResponse("submit.html", {"request": request, "results": results, "questions": questions})
+
