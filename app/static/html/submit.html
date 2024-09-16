@@ -20,27 +20,30 @@
             </div>
         </div>
     </nav>
-    <div class="container">
-        <div class="section">
-            {% for i, result in results.items() %}
-                <div class="result-item {{ 'correct' if result['is_correct'] else 'incorrect' }}" onclick="toggleDetails('{{ i }}')">
-                    <div class="key">Question {{ i }}:</div>
-                    <div class="value">
-                        User Answer: <span >{{ result['user_value'] }}</span> <br>
-                        Correct Answer: <span >{{ result['correct_value'] }}</span>
+    <div class="container-xl">
+        <div class="row">
+            <div class="section col-12">
+                {% for i, result in results.items() %}
+                    <div class="result-item {{ 'correct' if result['is_correct'] else 'incorrect' }}" onclick="toggleDetails('{{ i }}')">
+                        <div class="key">Pytanie {{ i }}:</div>
+                        <div class="value">
+                            Twoja odpowiedź <span >{{ result['user_value'] }}</span> <br>
+                            Poprawna odpowiedź <span >{{ result['correct_value'] }}</span>
+                        </div>
+                        <div class="details" id="details-{{ i }}">
+                            {% with question=questions[i|int - 1] %}
+                                <div><strong>{{ question['pytanie'] }}</strong></div>
+                                <div>A: <span class="{{ 'user-answer' if result['user_value'] == 'a' else '' }} {{ 'correct-answer' if 'a' == result['correct_value'] else '' }}">{{ question['a'] }}</span></div>
+                                <div>B: <span class="{{ 'user-answer' if result['user_value'] == 'b' else '' }} {{ 'correct-answer' if 'b' == result['correct_value'] else '' }} ">{{ question['b'] }}</span></div>
+                                <div>C: <span class="{{ 'user-answer' if result['user_value'] == 'c' else '' }} {{ 'correct-answer' if 'c' == result['correct_value'] else '' }} ">{{ question['c'] }}</span></div>
+                                <div>D: <span class="{{ 'user-answer' if result['user_value'] == 'd' else '' }} {{ 'correct-answer' if 'd' == result['correct_value'] else '' }} ">{{ question['d'] }}</span></div>
+                            {% endwith %}
+                        </div>
                     </div>
-                    <div class="details" id="details-{{ i }}">
-                        {% with question=questions[i|int - 1] %}
-                            <div><strong>{{ question['pytanie'] }}</strong></div>
-                            <div>A: <span class="{{ 'user-answer' if result['user_value'] == 'a' else '' }} {{ 'correct-answer' if 'a' == result['correct_value'] else '' }}">{{ question['a'] }}</span></div>
-                            <div>B: <span class="{{ 'user-answer' if result['user_value'] == 'b' else '' }} {{ 'correct-answer' if 'b' == result['correct_value'] else '' }} ">{{ question['b'] }}</span></div>
-                            <div>C: <span class="{{ 'user-answer' if result['user_value'] == 'c' else '' }} {{ 'correct-answer' if 'c' == result['correct_value'] else '' }} ">{{ question['c'] }}</span></div>
-                            <div>D: <span class="{{ 'user-answer' if result['user_value'] == 'd' else '' }} {{ 'correct-answer' if 'd' == result['correct_value'] else '' }} ">{{ question['d'] }}</span></div>
-                        {% endwith %}
-                    </div>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
+        
     </div>
 
     <footer class="footer text-center py-3 mt-auto">

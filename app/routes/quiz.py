@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Request, Form
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
 import os
 
 from app.services.quiz import *
@@ -44,4 +43,3 @@ async def submit_quiz(request: Request):
     questions = request.session.get("questions", None)
     results = await check_answers(user_answers, correct_answers)
     return templates.TemplateResponse("submit.html", {"request": request, "results": results, "questions": questions})
-

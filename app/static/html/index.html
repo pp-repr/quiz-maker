@@ -25,15 +25,17 @@
         </div>
     </nav>
 
-    <div class="container align-items-center">
-        <div class="left-section d-grid justify-content-center align-items-center p-3" style="width: 40%; height: 80%; ">
-            <h1>Wygeneruj własny quiz sprawdzający wiedze na podstawie dowolnego artykułu</h1>
-            <h1 style="text-align: right;">Wklej dowolny artykuł, wygeneruj quiz abcd i ucz się w zaskakująco szybkim tempie</h1>
-            <button onclick="fetchText()" type="button" class="btn btn-outline-secondary btn-rounded" data-mdb-ripple-init  data-mdb-ripple-color="dark">Wygeneruj</button>
-        </div>
-
-        <div class="right-section d-flex justify-content-center align-items-center p-3" style="width: 80%; height: 100%;">
-            <textarea id="textArea" class="text-area" placeholder="Wpisz tutaj swój tekst..."></textarea>
+    <div class="container-xl">
+        <div class="row align-items-sm-center justify-content-around">
+            <div class="col-sm-4 col-12 left-section" >
+                <h1 >Wygeneruj własny quiz sprawdzający wiedze na podstawie dowolnego artykułu</h1>
+                <h1 style="text-align: right;">Wklej dowolny artykuł, wygeneruj quiz abcd i ucz się w zaskakująco szybkim tempie</h1>
+                <button onclick="fetchText()" type="button" class="btn btn-outline-secondary btn-rounded" data-mdb-ripple-init  data-mdb-ripple-color="dark">Wygeneruj</button>
+            </div>
+    
+            <div class="col-sm-7 col-12 right-section">
+                <textarea id="textArea" class="text-area" placeholder="Wpisz tutaj swój tekst..."></textarea>
+            </div>
         </div>
     </div>
 
