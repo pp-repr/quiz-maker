@@ -1,7 +1,8 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, status, Header, File, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, BackgroundTasks, Depends, status, Header, File, UploadFile, Request
+from fastapi.responses import JSONResponse, HTMLResponse
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.templating import Jinja2Templates
 
 from app.responses.user import UserResponse, LoginResponse
 from app.schemas.user import *
@@ -9,6 +10,9 @@ from app.config.database import get_session
 from app.auth.user import *
 from app.services.user import *
 from app.services.admin import get_user_details
+
+
+templates=Jinja2Templates(directory=os.path.join(os.path.dirname(os.path.dirname(__file__)), "static/html"))
 
 
 user_router = APIRouter(
@@ -46,6 +50,22 @@ async def register_user(background_tasks: BackgroundTasks, data: RegisterUserReq
     a **number**, and a **special** character
     """
     return await create_user_account(data, session, background_tasks)
+
+
+@user_router.get("/")
+async def register_page(request: Request):
+    """
+    Register page
+    """
+    return templates.TemplateResponse("register.html", {"request": request})
+
+
+@auth_router.get("/login")
+async def login_page(request: Request):
+    """
+    Login page
+    """
+    return templates.TemplateResponse("login.html", {"request": request})
 
 
 @user_router.post("/verify", status_code=status.HTTP_200_OK)
