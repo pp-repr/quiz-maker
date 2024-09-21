@@ -28,10 +28,11 @@ async def quiz(request: Request, text: str = Form(...)):
 @router.get("/quiz")
 async def get_text(request: Request):
     text = request.session.get("submitted_text", None)
+    del request.session["submitted_text"]
     output = await create_output(text)
-    questions, correct_answers = await parse_quiz(output)
-    request.session["questions"] = questions
+    questions, correct_answers = await parse_quiz(output, text)
     request.session["correct_answers"] = correct_answers
+    request.session["questions"] = questions
     return templates.TemplateResponse("quiz.html", {"request": request, "questions": questions})
 
 
@@ -39,7 +40,8 @@ async def get_text(request: Request):
 async def submit_quiz(request: Request):
     form_data = await request.form()
     user_answers = {key: form_data[key] for key in form_data}
-    correct_answers = request.session.get("correct_answers", None)
-    questions = request.session.get("questions", None)
+    correct_answers = request.session.get("correct_answers", {})
+    questions = request.session.get("questions", {})
     results = await check_answers(user_answers, correct_answers)
+    request.session.clear()
     return templates.TemplateResponse("submit.html", {"request": request, "results": results, "questions": questions})

@@ -7,23 +7,37 @@ from app.config.settings import get_settings
 
 settings = get_settings()
 genai.configure(api_key=settings.GOOGLE_KEY)
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 
 async def create_output(text):
-    model = genai.GenerativeModel("gemini-1.5-flash")
     prompt1 = "Wygeneruj test sprawdzające wiedze z podanego tekstu: "
-    prompt2 = 'Umieść test 5 pytań, odpowiedzi i poprawną odpowiedz w nastepujący sposób [{"pytanie":..., "a":..., "b":..., "c":..., "d":..., "poprawna_odpowiedz":...}, {"pytanie":.... etc}... etc]'
+    prompt2 = 'Umieść test 5 pytań, odpowiedzi i poprawną odpowiedz w nastepujący sposób [{"pytanie":..., "a":..., "b":..., "c":..., "d":..., "poprawna_odpowiedz":...}, {"pytanie":.... etc}... etc].'
     response = model.generate_content(prompt1+text+prompt2)
     return response.text
 
 
-async def parse_quiz(quiz_text):
-    text = quiz_text.replace("\n", "")
+async def parse_quiz(quiz_text, text):
+    match = clean_text(quiz_text)
+    try:
+        quiz = json.loads(match.group(0))
+        questions, correct_answers = split_json(quiz)
+        return questions, correct_answers
+    except Exception as e:
+        prompt1 = 'Wystąpił błąd: ' + str(e)
+        prompt2 = 'Spróbuj ponownie wygenerować test na podstawie tego tekstu: '
+        response = model.generate_content(prompt1+prompt2+text)
+        new_result = clean_text(response.text)
+        quiz = json.loads(new_result.group(0))
+        questions, correct_answers = split_json(quiz)
+        return questions, correct_answers
+
+
+def clean_text(text):
+    result = text.replace("\n", "")
     pattern = r'\[(.*?)\]'
-    match = re.search(pattern, text, re.DOTALL)
-    quiz = json.loads(match.group(0))
-    questions, correct_answers = split_json(quiz)
-    return questions, correct_answers
+    match = re.search(pattern, result, re.DOTALL)
+    return match
 
 
 def split_json(json_data):

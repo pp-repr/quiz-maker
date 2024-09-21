@@ -66,7 +66,7 @@ async function registerUser(event) {
     });
 
     try {
-        const response = await fetch('http://localhost:8000/users', {
+        const response = await fetch('/users', {
             method: 'POST',
             headers: {
                 'accept': 'application/json',
@@ -79,6 +79,7 @@ async function registerUser(event) {
 
         if (response.ok) {
             document.getElementById('message').innerHTML = `<p class="success">Rejestracja udana! Witaj, ${result.name}.</p>`;
+            window.location.href = '/'
         } else {
             document.getElementById('message').innerHTML = `<p class="error">Wystąpił błąd: ${result.detail}</p>`;
         }
@@ -99,7 +100,7 @@ async function loginUser(event) {
     });
 
     try {
-        const response = await fetch('http://localhost:8000/auth/login', {
+        const response = await fetch('/auth/login', {
             method: 'POST',
             headers: {
                 'accept': 'application/json',
@@ -111,7 +112,9 @@ async function loginUser(event) {
         const result = await response.json();
 
         if (response.ok) {
+            localStorage.setItem('token', result.access_token);
             document.getElementById('message').innerHTML = `<p class="success">Logowanie udane!</p>`;
+            window.location.href = '/'
         } else {
             document.getElementById('message').innerHTML = `<p class="error">Wystąpił błąd: ${result.detail}</p>`;
         }
