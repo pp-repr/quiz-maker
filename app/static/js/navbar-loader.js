@@ -26,8 +26,7 @@ function loadNavbar() {
 
 
 function checkIfLoggedIn() {
-    const accessToken = localStorage.getItem('token');
-    return accessToken !== null;
+    return sessionStorage.getItem('actoken') !== null;
 }
 
 document.addEventListener('DOMContentLoaded', loadNavbar);

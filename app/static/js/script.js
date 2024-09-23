@@ -112,7 +112,9 @@ async function loginUser(event) {
         const result = await response.json();
 
         if (response.ok) {
-            localStorage.setItem('token', result.access_token);
+            sessionStorage.setItem('actoken', result.access_token);
+            sessionStorage.setItem('retoken', result.refresh_token);
+            sessionStorage.setItem('expires', result.expires_in);
             document.getElementById('message').innerHTML = `<p class="success">Logowanie udane!</p>`;
             window.location.href = '/'
         } else {
