@@ -1,4 +1,4 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, status, Header, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, status, Header, Request, Response
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
@@ -30,22 +30,27 @@ async def login_page(request: Request):
 
 
 @auth_router.post("/login", status_code=status.HTTP_200_OK, response_model=LoginResponse)
-async def user_login(data: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
+async def user_login(response: Response,
+                     data: OAuth2PasswordRequestForm = Depends(), 
+                     session: Session = Depends(get_session)):
     """
     Login user
 
     - **username**: email address used to register the user
     - **password**: password used to register the user
     """
-    return await get_login_token(data, session)
+    return await get_login_token(data, session, response)
 
 
 @auth_router.post("/refresh", status_code=status.HTTP_200_OK, response_model=LoginResponse)
-async def refresh_token(refresh_token = Header(), session: Session = Depends(get_session)):
+async def refresh_token(request: Request,
+                        response: Response, 
+                        session: Session = Depends(get_session)):
     """
     Refresh token
     """
-    return await get_refresh_token(refresh_token, session)
+    refresh_token = request.cookies.get("rt")
+    return await get_refresh_token(refresh_token, session, response)
 
 
 @auth_router.post("/forgot-password", status_code=status.HTTP_200_OK)

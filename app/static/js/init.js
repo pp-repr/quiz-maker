@@ -1,10 +1,10 @@
+let refreshTimeout = null;
+
 async function refreshTokenRequest() {
-    refreshToken = sessionStorage.getItem('retoken');
     const response = await fetch('/auth/refresh', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'refresh-token': refreshToken
         },
         body: JSON.stringify({})
     });
@@ -12,8 +12,8 @@ async function refreshTokenRequest() {
     const data = await response.json();
 
     if (response.ok) {
+        const expiresIn = data.expires_in;
         sessionStorage.setItem('actoken', data.access_token);
-        sessionStorage.setItem('retoken', data.refresh_token);
         sessionStorage.setItem('expires', data.expires_in);
 
         setupAutoRefresh(expiresIn);
@@ -26,21 +26,20 @@ async function refreshTokenRequest() {
 function setupAutoRefresh(expiresIn) {
     const refreshTime = (expiresIn - 30) * 1000;
 
-    setTimeout(() => {
+    if (refreshTimeout) {
+        clearTimeout(refreshTimeout);
+    }
+
+    refreshTimeout = setTimeout(() => {
         refreshTokenRequest();
     }, refreshTime);
 }
 
 function initialize() {
     accessToken = sessionStorage.getItem('actoken');
-    refreshToken = sessionStorage.getItem('retoken');
     expiresIn = sessionStorage.getItem('expires');
-
-    if (accessToken && refreshToken && expiresIn) {
-        setupAutoRefresh(expiresIn);
-    } else {
-        document.getElementById('status').innerText = "Token status: Not logged in";
-        window.location.href = '/auth/login';
+    if (accessToken && expiresIn) {
+        setupAutoRefresh(Number(expiresIn));
     }
 }
 

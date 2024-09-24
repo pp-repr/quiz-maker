@@ -113,7 +113,6 @@ async function loginUser(event) {
 
         if (response.ok) {
             sessionStorage.setItem('actoken', result.access_token);
-            sessionStorage.setItem('retoken', result.refresh_token);
             sessionStorage.setItem('expires', result.expires_in);
             document.getElementById('message').innerHTML = `<p class="success">Logowanie udane!</p>`;
             window.location.href = '/'

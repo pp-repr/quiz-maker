@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Response
 from datetime import datetime, timedelta, timezone
 import jwt
 import logging
@@ -41,13 +41,9 @@ async def get_token_user(token: str, db):
 
 
 async def find_user_token(db, payload):
-    user_token_id = decode_token_field(payload, 'r')
     user_id = decode_token_field(payload, 'sub')
-    access_key = payload.get('a')
     
     return db.query(UserToken).options(joinedload(UserToken.user)).filter(
-        UserToken.access_key == access_key,
-        UserToken.id == user_token_id,
         UserToken.user_id == user_id,
         UserToken.expires_at > datetime.now(timezone.utc)
     ).first()
@@ -65,12 +61,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     raise HTTPException(status_code=401, detail="Not authorised.")
 
 
-def create_user_token(user_id: int, refresh_key: str, access_key: str, expires_at: datetime, 
+def create_user_token(user_id: int, token: str, expires_at: datetime, 
                       session: Session) -> UserToken:
     user_token = UserToken()
     user_token.user_id = user_id
-    user_token.refresh_key = refresh_key
-    user_token.access_key = access_key
+    user_token.token = token
     user_token.expires_at = expires_at
     session.add(user_token)
     session.commit()
@@ -78,11 +73,10 @@ def create_user_token(user_id: int, refresh_key: str, access_key: str, expires_a
     return user_token
 
 
-def create_access_token_payload(user, access_key: str, user_token_id: int) -> dict:
+def create_access_token_payload(user, access_key: str) -> dict:
     return {
         "sub": str_encode(str(user.id)),
         'a': access_key,
-        'r': str_encode(str(user_token_id)),
         'n': str_encode(f"{user.name}")
     }
 
@@ -95,31 +89,27 @@ def create_refresh_token_payload(user_id: int, refresh_key: str, access_key: str
     }
 
 
-def generate_tokens(at_payload: dict, rt_payload: dict, at_expires: timedelta, rt_expires: timedelta) -> dict:
+def create_token_payload(user, session: Session, response: Response):
+    refresh_key, access_key, rt_expires = generate_keys_and_expiry(settings.REFRESH_TOKEN_EXPIRE_MINUTES)
+    expires_at = datetime.now(timezone.utc) + rt_expires
+    
+    at_payload = create_access_token_payload(user, access_key)
+    rt_payload = create_refresh_token_payload(user.id, refresh_key, access_key)
+
+    create_user_token(user.id, refresh_key, expires_at, session)
+    
+    at_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_jwt(at_payload, settings.JWT_SECRET, settings.JWT_ALGORITHM, at_expires)
     refresh_token = create_jwt(rt_payload, settings.SECRET_KEY, settings.JWT_ALGORITHM, rt_expires)
+    response.set_cookie(key="rt", value=refresh_token, httponly=True, secure=True, samesite='Lax')
+    
     return {
         "access_token": access_token,
-        "refresh_token": refresh_token,
         "expires_in": at_expires.seconds
     }
 
 
-def create_token_payload(user, session: Session):
-    refresh_key, access_key, rt_expires = generate_keys_and_expiry(settings.REFRESH_TOKEN_EXPIRE_MINUTES)
-    expires_at = datetime.now(timezone.utc) + rt_expires
-    
-    user_token = create_user_token(user.id, refresh_key, access_key, expires_at, session)
-    
-    at_payload = create_access_token_payload(user, access_key, user_token.id)
-    rt_payload = create_refresh_token_payload(user.id, refresh_key, access_key)
-    
-    at_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    
-    return generate_tokens(at_payload, rt_payload, at_expires, rt_expires)
-
-
-async def get_login_token(data, session):
+async def get_login_token(data, session, response):
     user = await load_user(data.username, session)
     if not user:
         raise HTTPException(status_code=400, detail="Email not found")
@@ -129,16 +119,16 @@ async def get_login_token(data, session):
         raise HTTPException(status_code=400, detail="Your account is deactivated, contact with support")
     if not user.verified_at:
         raise HTTPException(status_code=400, detail="Your account is not verified, check your email inbox")
-    return create_token_payload(user, session)
+    return create_token_payload(user, session, response)
 
 
-async def get_refresh_token(refresh_token, session):
+async def get_refresh_token(refresh_token, session, response):
     payload = validate_refresh_token(refresh_token)
     user_token = get_valid_refresh_token(payload, session)
     user_token.expires_at = datetime.now(timezone.utc)
     session.add(user_token)
     session.commit()
-    return create_token_payload(user_token.user, session)
+    return create_token_payload(user_token.user, session, response)
 
 
 def validate_refresh_token(refresh_token):
@@ -149,12 +139,10 @@ def validate_refresh_token(refresh_token):
 
 
 def get_valid_refresh_token(payload, session):
-    refresh_key = payload.get('t')
-    access_key = payload.get('a')
+    token = payload.get('t')
     user_id = str_decode(payload.get('sub'))
     user_token = session.query(UserToken).options(joinedload(UserToken.user)).filter(
-        UserToken.refresh_key == refresh_key,
-        UserToken.access_key == access_key,
+        UserToken.token == token,
         UserToken.user_id == user_id,
         UserToken.expires_at > datetime.now(timezone.utc)
     ).first()
