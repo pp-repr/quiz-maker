@@ -1,8 +1,12 @@
-from fastapi import APIRouter, Request, Form
+from fastapi import APIRouter, Request, Form, Depends
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.orm import Session
 import os
 
 from app.services.quiz import *
+from app.services.save_quiz import *
+from app.config.database import get_session
+from app.auth.user import get_current_user_or_none
 
 templates=Jinja2Templates(directory=os.path.join(os.path.dirname(os.path.dirname(__file__)), "static/html"))
 
@@ -20,28 +24,32 @@ async def get_main(request:Request):
 
 
 @router.post("/quiz")
-async def quiz(request: Request, text: str = Form(...)):
-    request.session["submitted_text"] = text
-    return {"message": "Text has been saved in session"}
-    
-
-@router.get("/quiz")
-async def get_text(request: Request):
-    text = request.session.get("submitted_text", None)
-    del request.session["submitted_text"]
+async def quiz(request: Request, 
+               text: str = Form(...),
+               user = Depends(get_current_user_or_none), 
+               session: Session = Depends(get_session)):
     output = await create_output(text)
     questions, correct_answers = await parse_quiz(output, text)
-    request.session["correct_answers"] = correct_answers
-    request.session["questions"] = questions
+    if user is not None:
+        id_quiz = await save_quiz(questions, correct_answers, session, user.id)
+        request.session["id_quiz"] = id_quiz
+    else:
+        request.session["correct_answers"] = correct_answers
+        request.session["questions"] = questions
     return templates.TemplateResponse("quiz.html", {"request": request, "questions": questions})
 
 
 @router.post("/submit")
-async def submit_quiz(request: Request):
-    form_data = await request.form()
-    user_answers = {key: form_data[key] for key in form_data}
-    correct_answers = request.session.get("correct_answers", {})
-    questions = request.session.get("questions", {})
+async def submit_quiz(request: Request,
+                      user = Depends(get_current_user_or_none), 
+                      session: Session = Depends(get_session)):
+    user_answers = await get_user_answer(request)
+    if user is not None:
+        id_quiz =  request.session.get("id_quiz", None)
+        questions, correct_answers = get_questions_and_answers(session, id_quiz)
+    else:
+        correct_answers = request.session.get("correct_answers", {})
+        questions = request.session.get("questions", {})
     results = await check_answers(user_answers, correct_answers)
     request.session.clear()
     return templates.TemplateResponse("submit.html", {"request": request, "results": results, "questions": questions})

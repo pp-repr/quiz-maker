@@ -1,12 +1,14 @@
 async function fetchText() {
     const textarea = document.getElementById('textArea');
     const text = textarea.value;
+    const token = sessionStorage.getItem('actoken') || '';
 
     try {
         const response = await fetch('/quiz', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': `Bearer ${token}`
             },
             body: new URLSearchParams({
                 'text': text
@@ -14,7 +16,12 @@ async function fetchText() {
         });
 
         if (response.ok) {
-            window.location.href = '/quiz';
+            const pageContent = await response.text();
+            const mainContent = document.getElementById('main-content');
+            if (mainContent) {
+                mainContent.innerHTML = pageContent;
+            }
+            loadExternalScripts();
         } else {
             alert('Something went wrong!');
         }
@@ -24,7 +31,16 @@ async function fetchText() {
 }
 
 
-function validateForm() {
+function loadExternalScripts() {
+    const script = document.createElement('script');
+    script.src = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js";
+    document.head.appendChild(script);
+}
+
+
+async function validateForm(event) {
+    event.preventDefault();
+
     const questions = document.querySelectorAll('.section input[type="radio"]');
     const answeredQuestions = new Set();
     const totalQuestions = new Set([...questions].map(q => q.name)).size;
@@ -38,7 +54,32 @@ function validateForm() {
         alert("Proszę odpowiedzieć na wszystkie pytania przed wysłaniem.");
         return false;
     }
-    return true;
+
+    const token = sessionStorage.getItem('actoken') || '';
+    const form = document.getElementById('form-quiz');
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch('/submit', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (response.ok) {
+            const pageContent = await response.text();
+            const mainContent = document.getElementById('main-content');
+            if (mainContent) {
+                mainContent.innerHTML = pageContent;
+            }
+            loadExternalScripts();
+        } else {
+            alert('Something went wrong!');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
 }
 
 

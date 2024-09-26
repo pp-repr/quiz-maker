@@ -26,10 +26,11 @@ async def parse_quiz(quiz_text, text):
     except Exception as e:
         prompt1 = 'Wystąpił błąd: ' + str(e)
         prompt2 = 'Spróbuj ponownie wygenerować test na podstawie tego tekstu: '
-        response = model.generate_content(prompt1+prompt2+text)
+        prompt3 = prompt2 = '. Umieść test 5 pytań, odpowiedzi i poprawną odpowiedz w nastepujący sposób [{"pytanie":..., "a":..., "b":..., "c":..., "d":..., "poprawna_odpowiedz":...}, {"pytanie":.... etc}... etc].'
+        response = model.generate_content(prompt1+prompt2+text+prompt3)
         new_result = clean_text(response.text)
         quiz = json.loads(new_result.group(0))
-        questions, correct_answers = split_json(quiz)
+        questions, correct_answers = split_json(quiz, "poprawna_odpowiedz")
         return questions, correct_answers
 
 
@@ -40,10 +41,10 @@ def clean_text(text):
     return match
 
 
-def split_json(json_data):
+def split_json(json_data, key):
     json_answers = {}
     for i, question in enumerate(json_data, start=1):
-        json_answers[f"{i}"] = question.pop("poprawna_odpowiedz")
+        json_answers[f"{i}"] = question.pop(key)
     return json_data, json_answers
 
 
@@ -61,3 +62,9 @@ async def check_answers(user_data, correct_data):
                            }
         i+=1
     return results
+
+
+async def get_user_answer(request):
+    form_data = await request.form()
+    user_answers = {key: form_data[key] for key in form_data}
+    return user_answers

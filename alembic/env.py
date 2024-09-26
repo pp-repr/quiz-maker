@@ -7,6 +7,7 @@ from app.config.database import Base
 from alembic import context
 
 from app.models.user import *
+from app.models.quiz import *
 
 from app.config.settings import get_settings
 

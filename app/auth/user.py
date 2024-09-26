@@ -2,6 +2,7 @@ from fastapi import Depends, HTTPException, Response
 from datetime import datetime, timedelta, timezone
 import jwt
 import logging
+from typing import Optional
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import joinedload, Session
 
@@ -61,6 +62,17 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     raise HTTPException(status_code=401, detail="Not authorised.")
 
 
+async def get_current_user_or_none(token: Optional[str] = Depends(oauth2_scheme), db: Session = Depends(get_session)):
+    try:
+        if token is None:
+            return None
+        user = await get_token_user(token, db)
+        return user
+    except Exception as e:
+        print(f"Error fetching user: {str(e)}")
+        return None
+
+
 def create_user_token(user_id: int, token: str, expires_at: datetime, 
                       session: Session) -> UserToken:
     user_token = UserToken()
@@ -70,7 +82,7 @@ def create_user_token(user_id: int, token: str, expires_at: datetime,
     session.add(user_token)
     session.commit()
     session.refresh(user_token)
-    return user_token
+    # return user_token
 
 
 def create_access_token_payload(user, access_key: str) -> dict:
