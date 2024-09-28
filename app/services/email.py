@@ -25,7 +25,7 @@ async def send_email_with_template(user: User, subject: str, template_name: str,
 
 async def send_account_verification_email(user: User, background_tasks: BackgroundTasks):
     token = get_hash_password(user.get_context(context=USER_VERIFY_ACCOUNT))
-    activate_url = f"{settings.FRONTEND_HOST}/auth/account-verify?token={token}&email={user.email}"
+    activate_url = f"{settings.DOMAIN}/users/account-verify?token={token}&email={user.email}"
     subject = f"Account Verification - {settings.APP_NAME}"
     template_data = {'activate_url': activate_url}
     
@@ -40,7 +40,7 @@ async def send_account_verification_email(user: User, background_tasks: Backgrou
 
 async def send_account_activation_confirmation_email(user: User, background_tasks: BackgroundTasks):
     subject = f"Welcome - {settings.APP_NAME}"
-    template_data = {'login_url': f'{settings.FRONTEND_HOST}'}
+    template_data = {'login_url': f'{settings.DOMAIN}'}
     
     await send_email_with_template(
         user=user,
@@ -53,7 +53,7 @@ async def send_account_activation_confirmation_email(user: User, background_task
 
 async def send_password_reset_email(user: User, background_tasks: BackgroundTasks):
     token = get_hash_password(user.get_context(FORGOT_PASSWORD))
-    reset_url = f"{settings.FRONTEND_HOST}/reset-password?token={token}&email={user.email}"
+    reset_url = f"{settings.DOMAIN}/reset-password?token={token}&email={user.email}"
     subject = f"Reset Password - {settings.APP_NAME}"
     template_data = {'activate_url': reset_url}
     

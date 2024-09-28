@@ -13,7 +13,6 @@ async function refreshTokenRequest() {
 
     if (response.ok) {
         const expiresIn = data.expires_in;
-        sessionStorage.setItem('actoken', data.access_token);
         sessionStorage.setItem('expires', data.expires_in);
 
         setupAutoRefresh(expiresIn);
@@ -36,11 +35,18 @@ function setupAutoRefresh(expiresIn) {
 }
 
 function initialize() {
-    accessToken = sessionStorage.getItem('actoken');
     expiresIn = sessionStorage.getItem('expires');
-    if (accessToken && expiresIn) {
+    if (expiresIn) {
         setupAutoRefresh(Number(expiresIn));
     }
 }
 
 window.onload = initialize;
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('logout')) {
+        alert('Zostałeś wylogowany!');
+    }
+});

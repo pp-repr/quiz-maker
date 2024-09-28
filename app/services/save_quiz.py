@@ -40,7 +40,8 @@ def add_questions_to_database(questions, correct_answers, session, id_quiz):
 def get_questions_and_answers(session, quiz_id):
     quiz = get_quiz(session, quiz_id)
     json_quiz = objects_to_json(quiz)
-    questions, correct_answers = split_json(json_quiz, "correct_answer")
+    data = json.loads(json_quiz)
+    questions, correct_answers = split_json(data, "correct_answer")
     return questions, correct_answers
 
 

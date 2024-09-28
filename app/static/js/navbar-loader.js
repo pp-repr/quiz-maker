@@ -11,22 +11,27 @@ function loadNavbar() {
         .then(data => {
             navbarContainer.innerHTML = data;
 
-            const isLoggedIn = checkIfLoggedIn();
-
-            if (isLoggedIn) {
-                document.getElementById('navbar-user').style.display = 'block';
-            } else {
+            fetch('/users/me', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('navbar-user').style.display = 'block';
+                } else if (response.status === 401) {
+                    document.getElementById('navbar-guest').style.display = 'block';
+                } else {
+                    throw new Error('Unexpected response status: ' + response.status);
+                }
+            })
+            .catch(error => {
+                console.error('Error checking login status:', error);
                 document.getElementById('navbar-guest').style.display = 'block';
-            }
+            });
         })
         .catch(error => {
             console.error('Problem loading the navigation', error);
         });
-}
-
-
-function checkIfLoggedIn() {
-    return sessionStorage.getItem('actoken') !== null;
 }
 
 document.addEventListener('DOMContentLoaded', loadNavbar);

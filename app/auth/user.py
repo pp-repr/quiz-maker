@@ -1,9 +1,11 @@
-from fastapi import Depends, HTTPException, Response
+from fastapi import Depends, HTTPException, Response, Request
 from datetime import datetime, timedelta, timezone
 import jwt
 import logging
 from typing import Optional
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
+from fastapi.security import OAuth2
+from fastapi.security.utils import get_authorization_scheme_param
 from sqlalchemy.orm import joinedload, Session
 
 from app.models.user import UserToken
@@ -13,7 +15,37 @@ from app.auth.utils import str_decode, str_encode, generate_keys_and_expiry, ver
 from app.services.user import load_user
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+class OAuth2PasswordBearerCookie(OAuth2):
+    def __init__(
+        self,
+        token_url: str,
+        scheme_name: str = None,
+        scopes: dict = None,
+        auto_error: bool = True,
+    ):
+        if not scopes:
+            scopes = {}
+        flows = OAuthFlowsModel(password={"tokenUrl": token_url, "scopes": scopes})
+        super().__init__(flows=flows, scheme_name=scheme_name, auto_error=auto_error)
+
+    async def __call__(self, request: Request) -> Optional[str]:
+        authorization: str = request.cookies.get("Authorization")
+        scheme, param = get_authorization_scheme_param(authorization)
+
+        if not authorization or scheme.lower() != "bearer":
+            if self.auto_error:
+                raise HTTPException(
+                    status_code=401,
+                    detail="Not authenticated",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            else:
+                return None
+
+        return param
+
+
+oauth2_scheme = OAuth2PasswordBearerCookie(token_url="/auth/login")
 settings = get_settings()
 
 
@@ -62,17 +94,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     raise HTTPException(status_code=401, detail="Not authorised.")
 
 
-async def get_current_user_or_none(token: Optional[str] = Depends(oauth2_scheme), db: Session = Depends(get_session)):
-    try:
-        if token is None:
-            return None
-        user = await get_token_user(token, db)
-        return user
-    except Exception as e:
-        print(f"Error fetching user: {str(e)}")
-        return None
-
-
 def create_user_token(user_id: int, token: str, expires_at: datetime, 
                       session: Session) -> UserToken:
     user_token = UserToken()
@@ -82,7 +103,6 @@ def create_user_token(user_id: int, token: str, expires_at: datetime,
     session.add(user_token)
     session.commit()
     session.refresh(user_token)
-    # return user_token
 
 
 def create_access_token_payload(user, access_key: str) -> dict:
@@ -114,9 +134,8 @@ def create_token_payload(user, session: Session, response: Response):
     access_token = create_jwt(at_payload, settings.JWT_SECRET, settings.JWT_ALGORITHM, at_expires)
     refresh_token = create_jwt(rt_payload, settings.SECRET_KEY, settings.JWT_ALGORITHM, rt_expires)
     response.set_cookie(key="rt", value=refresh_token, httponly=True, secure=True, samesite='Lax')
-    
+    response.set_cookie("Authorization", value=f"Bearer {access_token}", httponly=True, samesite="Lax", secure=False)
     return {
-        "access_token": access_token,
         "expires_in": at_expires.seconds
     }
 
@@ -128,9 +147,9 @@ async def get_login_token(data, session, response):
     if not verify_password(data.password, user.password):
         raise HTTPException(status_code=400, detail="Invalid email or password")
     if not user.is_active:
-        raise HTTPException(status_code=400, detail="Your account is deactivated, contact with support")
+        raise HTTPException(status_code=400, detail="Your account is deactivated, check your email inbox")
     if not user.verified_at:
-        raise HTTPException(status_code=400, detail="Your account is not verified, check your email inbox")
+        raise HTTPException(status_code=400, detail="Your account is not verified, contact with support")
     return create_token_payload(user, session, response)
 
 

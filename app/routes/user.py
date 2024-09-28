@@ -1,5 +1,5 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, status, File, UploadFile, Request
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, BackgroundTasks, Depends, status, File, UploadFile, Request, Query
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from fastapi.templating import Jinja2Templates
 
@@ -52,15 +52,18 @@ async def register_page(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
 
 
-@user_router.post("/verify", status_code=status.HTTP_200_OK)
-async def verify_user_account( background_tasks: BackgroundTasks, data: VerifyUserRequest = Depends(VerifyUserRequest.form),
-                        session: Session = Depends(get_session)):
+@user_router.get("/account-verify", status_code=status.HTTP_200_OK)
+async def verify_user_account(background_tasks: BackgroundTasks, 
+                              token: str = Query(..., description="Verification token"),
+                              email: str = Query(..., description="Email address"),
+                              session: Session = Depends(get_session)):
     """
     Verify the new user account
 
     - **token**: a unique string included in the email to verify the user account
     - **email**: the email of the user, it's an unique identifier
     """
+    data = VerifyUserRequest(token=token, email=email)
     await activate_user_account(data, session, background_tasks)
     return JSONResponse({"Message": "Account is activated."})
 
@@ -106,4 +109,18 @@ async def update_image(file: UploadFile = File(...), user = Depends(get_current_
     """
     updated_user = await save_user_image(user.email, file, session)
     return updated_user
+
+
+@user_router.get("/logout")
+async def logout(response: Response,
+                 request: Request,
+                 user = Depends(get_current_user)):
+    """
+    Logout user
+    """
+    response = RedirectResponse(url="/?logout=true", status_code=status.HTTP_302_FOUND)
+    response.delete_cookie(key="rt", httponly=True, secure=True, samesite='Lax')
+    response.delete_cookie(key="Authorization", httponly=True, secure=False, samesite='Lax')
+    request.session.clear()
+    return response
    

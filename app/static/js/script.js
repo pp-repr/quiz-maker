@@ -1,14 +1,12 @@
 async function fetchText() {
     const textarea = document.getElementById('textArea');
     const text = textarea.value;
-    const token = sessionStorage.getItem('actoken') || '';
 
     try {
         const response = await fetch('/quiz', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': `Bearer ${token}`
             },
             body: new URLSearchParams({
                 'text': text
@@ -16,12 +14,7 @@ async function fetchText() {
         });
 
         if (response.ok) {
-            const pageContent = await response.text();
-            const mainContent = document.getElementById('main-content');
-            if (mainContent) {
-                mainContent.innerHTML = pageContent;
-            }
-            loadExternalScripts();
+            window.location.href = '/quiz';
         } else {
             alert('Something went wrong!');
         }
@@ -31,16 +24,7 @@ async function fetchText() {
 }
 
 
-function loadExternalScripts() {
-    const script = document.createElement('script');
-    script.src = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js";
-    document.head.appendChild(script);
-}
-
-
-async function validateForm(event) {
-    event.preventDefault();
-
+function validateForm() {
     const questions = document.querySelectorAll('.section input[type="radio"]');
     const answeredQuestions = new Set();
     const totalQuestions = new Set([...questions].map(q => q.name)).size;
@@ -54,32 +38,7 @@ async function validateForm(event) {
         alert("Proszę odpowiedzieć na wszystkie pytania przed wysłaniem.");
         return false;
     }
-
-    const token = sessionStorage.getItem('actoken') || '';
-    const form = document.getElementById('form-quiz');
-    const formData = new FormData(form);
-
-    try {
-        const response = await fetch('/submit', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        if (response.ok) {
-            const pageContent = await response.text();
-            const mainContent = document.getElementById('main-content');
-            if (mainContent) {
-                mainContent.innerHTML = pageContent;
-            }
-            loadExternalScripts();
-        } else {
-            alert('Something went wrong!');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-    }
+    return true;
 }
 
 
@@ -119,8 +78,7 @@ async function registerUser(event) {
         const result = await response.json();
 
         if (response.ok) {
-            document.getElementById('message').innerHTML = `<p class="success">Rejestracja udana! Witaj, ${result.name}.</p>`;
-            window.location.href = '/'
+            document.getElementById('message').innerHTML = `<p class="success">Rejestracja udana! Sprawdź swoją poczte i aktywuj konto.</p>`;
         } else {
             document.getElementById('message').innerHTML = `<p class="error">Wystąpił błąd: ${result.detail}</p>`;
         }
@@ -153,7 +111,6 @@ async function loginUser(event) {
         const result = await response.json();
 
         if (response.ok) {
-            sessionStorage.setItem('actoken', result.access_token);
             sessionStorage.setItem('expires', result.expires_in);
             document.getElementById('message').innerHTML = `<p class="success">Logowanie udane!</p>`;
             window.location.href = '/'

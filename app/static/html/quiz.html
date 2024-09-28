@@ -1,25 +1,53 @@
-<form id="form-quiz" onsubmit="return validateForm(event)">
-    <div class="section">
-        {% for question in questions %}
-            <h3>{{ loop.index }}. {{ question.pytanie }}</h3>
-            <label>
-                <input type="radio" name="{{ loop.index }}" value="a">
-                {{ question.a }}
-            </label><br>
-            <label>
-                <input type="radio" name="{{ loop.index }}" value="b">
-                {{ question.b }}
-            </label><br>
-            <label>
-                <input type="radio" name="{{ loop.index }}" value="c">
-                {{ question.c }}
-            </label><br>
-            <label>
-                <input type="radio" name="{{ loop.index }}" value="d">
-                {{ question.d }}
-            </label><br>
-        <hr>
-        {% endfor %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="/static/css/styles.css" rel="stylesheet">
+    <script src="/static/js/navbar-loader.js" defer></script>
+    
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <div id="navbar"></div>
+    <div class="container-xl" id="main-content">
+        <form action="/submit" method="POST" onsubmit="return validateForm()">
+            <div class="section">
+                {% for question in questions %}
+                    <h3>{{ loop.index }}. {{ question.get('question_text', question.get('pytanie')) }}</h3>
+                    <label>
+                        <input type="radio" name="{{ loop.index }}" value="a">
+                        {{ question.get('answer_a', question.get('a')) }}
+                    </label><br>
+                    <label>
+                        <input type="radio" name="{{ loop.index }}" value="b">
+                        {{ question.get('answer_b', question.get('b')) }}
+                    </label><br>
+                    <label>
+                        <input type="radio" name="{{ loop.index }}" value="c">
+                        {{ question.get('answer_c', question.get('c')) }}
+                    </label><br>
+                    <label>
+                        <input type="radio" name="{{ loop.index }}" value="d">
+                        {{ question.get('answer_d', question.get('d')) }}
+                    </label><br>
+                <hr>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-outline-secondary btn-rounded" data-mdb-ripple-init  data-mdb-ripple-color="dark">Wyślij odpowiedzi</button>
+        </form>
     </div>
-    <button type="submit" class="btn btn-outline-secondary btn-rounded" data-mdb-ripple-init  data-mdb-ripple-color="dark">Wyślij odpowiedzi</button>
-</form>
+
+    <footer class="footer text-center py-3 mt-auto">
+        <p>&copy; 2024 Twoja Strona</p>
+    </footer>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="/static/js/script.js"></script>
+    <script src="/static/js/init.js"></script>
+</body>
+</html>
