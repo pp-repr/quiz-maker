@@ -64,6 +64,14 @@ async def forgot_password(background_tasks: BackgroundTasks, data: EmailRequest 
     return JSONResponse({"message": "A email with password reset link has been sent to you."})
 
 
+@auth_router.get("/forgot-password", status_code=status.HTTP_200_OK)
+async def forgot_password_page(request: Request):
+    """
+    Forgot password page
+    """
+    return templates.TemplateResponse("forgot-password.html", {"request": request})
+
+
 @auth_router.put("/reset-password", status_code=status.HTTP_200_OK)
 async def reset_password(data: ResetRequest = Depends(ResetRequest.form), session: Session = Depends(get_session)):
     """

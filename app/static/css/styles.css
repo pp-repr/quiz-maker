@@ -206,7 +206,7 @@ button:hover {
     font-weight: bold;
 }
 
-#registerForm, #loginForm {
+#registerForm, #loginForm, #forgot-password {
     width: 300px;
     margin: auto;
     border-radius: 5px;
@@ -239,4 +239,22 @@ input[type="submit"]:hover {
 }
 .success {
     color: #28a745;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #1e1e1e;
+    color:#bbb;
 }

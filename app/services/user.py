@@ -73,6 +73,8 @@ async def load_user(email: str, db):
 
 async def email_forgot_password_link(data, background_tasks, session):
     user = await load_user(data.email, session)
+    if user is None:
+        raise HTTPException(status_code=400, detail="Your account is not existing. Register your account.")
     if not user.verified_at:
         raise HTTPException(status_code=400, detail="Your account is not verified. Please check your email inbox to verify your account.")
     if not user.is_active:

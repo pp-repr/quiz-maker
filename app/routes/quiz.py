@@ -7,13 +7,20 @@ from app.services.quiz import *
 from app.services.save_quiz import *
 from app.config.database import get_session
 from app.auth.user import get_current_user
-# from app.auth.user import get_current_user_or_none
+from app.schemas.quiz import QuizEditRequest
 
 templates=Jinja2Templates(directory=os.path.join(os.path.dirname(os.path.dirname(__file__)), "static/html"))
 
 
 router = APIRouter(
     prefix="",
+    tags=["Quiz"],
+    responses={404: {"desription": "Not found"}}
+)
+
+
+router_quiz = APIRouter(
+    prefix="/users",
     tags=["Quiz"],
     responses={404: {"desription": "Not found"}}
 )
@@ -82,3 +89,21 @@ async def submit_quiz(request: Request,
     results = await check_answers(user_answers, correct_answers)
     request.session.clear()
     return templates.TemplateResponse("submit.html", {"request": request, "results": results, "questions": questions})
+
+
+@router_quiz.get("/me/quizzes")
+async def get_quizzes(request: Request,
+                      session: Session = Depends(get_session),
+                      user = Depends(get_current_user)):
+    """
+    Show all user's quizzes.
+    """
+    quizzes = await get_all_quizzes(user, session)
+    return templates.TemplateResponse("quizzes.html", {"request": request, "quizzes": quizzes})
+
+
+@router_quiz.post("/me/quizzes")
+async def edit_quiz(session: Session = Depends(get_session),
+                    data: QuizEditRequest = Depends(QuizEditRequest.form)):
+    await update_name_quiz(session, data)
+    return {"message": "Quiz updated successfully"}

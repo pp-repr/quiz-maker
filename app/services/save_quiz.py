@@ -62,3 +62,23 @@ def object_to_dict(obj):
 def objects_to_json(objects):
     dict_list = [object_to_dict(obj) for obj in objects]
     return json.dumps(dict_list)
+
+
+async def get_all_quizzes(user, session):
+    return session.query(UserQuiz).filter(UserQuiz.user_id == user.id).all()
+
+
+async def update_name_quiz(session, data):
+    quiz = get_user_quiz(session, data.id)
+    quiz.quiz_name = data.quiz_name
+    session.commit()
+    session.refresh(quiz)
+
+
+def get_user_quiz(session, quiz_id):
+    try:
+        quiz = session.query(UserQuiz).filter(UserQuiz.id == quiz_id).first()
+    except Exception as e:
+        logging.info(f"Quiz Not Found")
+        quiz = None
+    return quiz

@@ -121,3 +121,35 @@ async function loginUser(event) {
         document.getElementById('message').innerHTML = `<p class="error">Wystąpił błąd: ${error.message}</p>`;
     }
 };
+
+
+async function forgotPassword(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('email').value;
+
+    const userData = new URLSearchParams({
+        email: email
+    });
+
+    try {
+        const response = await fetch('/auth/forgot-password', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: userData
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            document.getElementById('message').innerHTML = `<p class="success">Na twój adres e-mail wysłaliśmy link do zresetowania hasła! Sprawdź swoją poczte i aktywuj konto.</p>`;
+        } else {
+            document.getElementById('message').innerHTML = `<p class="error">Wystąpił błąd: ${result.detail}</p>`;
+        }
+    } catch (error) {
+        document.getElementById('message').innerHTML = `<p class="error">Wystąpił błąd: ${error.message}</p>`;
+    }
+};

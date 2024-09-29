@@ -10,7 +10,7 @@ load_dotenv()
 class Settings(BaseSettings):
     APP_NAME: str = "FastAPI"
     DEBUG: bool = False
-    DOMAIN: str = "localhost:8000"
+    DOMAIN: str = "http://localhost:8000"
 
     MYSQL_USER: str = os.getenv("MYSQL_USER")
     MYSQL_PASSWORD: str = os.getenv("MYSQL_PASSWORD")

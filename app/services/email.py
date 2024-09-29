@@ -40,7 +40,7 @@ async def send_account_verification_email(user: User, background_tasks: Backgrou
 
 async def send_account_activation_confirmation_email(user: User, background_tasks: BackgroundTasks):
     subject = f"Welcome - {settings.APP_NAME}"
-    template_data = {'login_url': f'{settings.DOMAIN}'}
+    template_data = {'login_url': f'{settings.DOMAIN}/auth/login'}
     
     await send_email_with_template(
         user=user,
