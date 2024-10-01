@@ -14,7 +14,9 @@ async function fetchText() {
         });
 
         if (response.ok) {
-            window.location.href = '/quiz';
+            const result = await response.json();
+            let id_quiz = result.id_quiz
+            window.location.href = `/quiz?id=${id_quiz}`;
         } else {
             alert('Something went wrong!');
         }

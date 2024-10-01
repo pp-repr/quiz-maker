@@ -33,7 +33,5 @@ function saveQuizName(id) {
 }
 
 function startQuiz(id) {
-    alert(`Rozpocznij test dla quizu o ID: ${id}`);
-    // Tutaj możesz dodać dodatkową logikę np. przekierowanie do strony z testem
-    // window.location.href = `/quiz/${id}/start`;
+    window.location.href = `/quiz?id=${id}`;
 }

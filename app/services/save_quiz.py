@@ -37,8 +37,10 @@ def add_questions_to_database(questions, correct_answers, session, id_quiz):
         session.refresh(ques)
 
 
-def get_questions_and_answers(session, quiz_id):
+async def get_questions_and_answers(session, quiz_id, user):
     quiz = get_quiz(session, quiz_id)
+    if not await check_quiz_owner(user, session, quiz_id):
+        raise HTTPException(status_code=403, detail="No permissions")
     json_quiz = objects_to_json(quiz)
     data = json.loads(json_quiz)
     questions, correct_answers = split_json(data, "correct_answer")
@@ -66,6 +68,11 @@ def objects_to_json(objects):
 
 async def get_all_quizzes(user, session):
     return session.query(UserQuiz).filter(UserQuiz.user_id == user.id).all()
+
+
+async def check_quiz_owner(user, session, quiz_id):
+    quizzes = await get_all_quizzes(user, session)
+    return any(quiz.id == quiz_id for quiz in quizzes)
 
 
 async def update_name_quiz(session, data):

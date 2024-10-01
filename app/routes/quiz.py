@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Form, Depends
+from fastapi import APIRouter, Request, Form, Depends, Query
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 import os
@@ -50,23 +50,25 @@ async def quiz(request: Request,
         access_token = token[7:]
         user = await get_current_user(access_token, session)
         id_quiz = await save_quiz(questions, correct_answers, session, user.id)
-        request.session["id_quiz"] = id_quiz
+        return {"id_quiz": id_quiz}
     else:
         request.session["correct_answers"] = correct_answers
         request.session["questions"] = questions
-    return {"message": "Text has been saved in session"}
+        return {"message": "Text has been saved in session"}
 
 
 @router.get("/quiz")
 async def get_text(request: Request,
+                   id: int = Query(..., description="Id quiz"),
                    session: Session = Depends(get_session)):
     """
     Display the quiz page
     """
     token = request.cookies.get("Authorization")
     if token is not None:
-        id_quiz =  request.session.get("id_quiz", None)
-        questions, _ = get_questions_and_answers(session, id_quiz)
+        user = await get_current_user(token[7:], session)
+        questions, _ = await get_questions_and_answers(session, id, user)
+        request.session["id_quiz"] = id
     else:
         questions = request.session.get("questions", {})
     return templates.TemplateResponse("quiz.html", {"request": request, "questions": questions})
@@ -82,7 +84,8 @@ async def submit_quiz(request: Request,
     token = request.cookies.get("Authorization")
     if token is not None:
         id_quiz =  request.session.get("id_quiz", None)
-        questions, correct_answers = get_questions_and_answers(session, id_quiz)
+        user = await get_current_user(token[7:], session)
+        questions, correct_answers = await get_questions_and_answers(session, id_quiz, user)
     else:
         correct_answers = request.session.get("correct_answers", {})
         questions = request.session.get("questions", {})

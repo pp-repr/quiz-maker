@@ -251,10 +251,3 @@ th, td {
     padding: 10px;
     text-align: left;
 }
-
-input[type="text"] {
-    width: 100%;
-    box-sizing: border-box;
-    background-color: #1e1e1e;
-    color:#bbb;
-}
