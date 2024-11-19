@@ -1,5 +1,5 @@
 **/__pycache__
-.env
+#.env
 .dockerignore
 alembic/versions/*.py
 app/static/profile-images/*
