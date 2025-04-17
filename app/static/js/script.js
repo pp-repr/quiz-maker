@@ -15,8 +15,13 @@ async function fetchText() {
 
         if (response.ok) {
             const result = await response.json();
-            let id_quiz = result.id_quiz
-            window.location.href = `/quiz?id=${id_quiz}`;
+            let id_quiz = result.id_quiz;
+            if (id_quiz !== undefined && id_quiz !== null){
+                window.location.href = `/quiz?id=${id_quiz}`;
+            }
+            else {
+                window.location.href = `/quiz`;
+            }
         } else {
             alert('Something went wrong!');
         }

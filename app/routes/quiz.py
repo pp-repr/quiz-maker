@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, Form, Depends, Query
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from typing import Optional
 import os
 
 from app.services.quiz import *
@@ -59,7 +60,7 @@ async def quiz(request: Request,
 
 @router.get("/quiz")
 async def get_text(request: Request,
-                   id: int = Query(..., description="Id quiz"),
+                   id: Optional[int] = Query(None, description="Id quiz"),
                    session: Session = Depends(get_session)):
     """
     Display the quiz page
